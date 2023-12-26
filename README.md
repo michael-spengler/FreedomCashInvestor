@@ -1,11 +1,11 @@
 # Freedom Cash Investor
 
 This module is utilized e.g. to stabilize the buy price and to increase the sell price for [Freedom Cash](https://github.com/monique-baumann/FreedomCash).  
+  
 It utilizes [Bollinger Bands](https://www.youtube.com/watch?v=-6cbdJulb7s) and [sleep](https://deno.land/x/sleep). 
 
 ## Usage Example
 ```ts
-
 import { InvestorServiceBBBased } from "https://deno.land/x/freedom_cash_investor/src/investor-service.ts"
 
 const investorServiceBBBased: InvestorServiceBBBased = new InvestorServiceBBBased(27)
@@ -17,7 +17,6 @@ investorServiceBBBased.addToPriceHistory(3)
 const investmentDecision = investorServiceBBBased.getInvestmentDecision(minHistoryLength)
 
 console.log(investmentDecision)
-
 ```
 
 ## Execute Usage Example
@@ -37,7 +36,7 @@ deno test https://deno.land/x/freedom_cash_investor/src/investor-service.spec.ts
 
 ---
   
- For further examples you can check the [unit tests](https://deno.land/x/freedom_cash_investor/src/investor-service.spec.ts).
+For further examples you can check the [unit tests](https://github.com/monique-baumann/FreedomCashInvestor/blob/main/src/investor-service.spec.ts).
   
 ## Donations
 Thanks to [Freedom Cash](https://FreedomCash.org), we are already free.  
