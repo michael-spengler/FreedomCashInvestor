@@ -1,4 +1,4 @@
-import { InvestorServiceBBBased } from "./src/investor-service.ts"
+import { InvestorServiceBBBased } from "https://deno.land/x/freedom_cash_investor/src/investor-service.ts"
 
 const investorServiceBBBased: InvestorServiceBBBased = new InvestorServiceBBBased(27)
 const minHistoryLength = 3

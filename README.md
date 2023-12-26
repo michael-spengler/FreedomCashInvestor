@@ -1,11 +1,12 @@
 # Freedom Cash Investor
 
-This module is utilized e.g. to stabilize the buy price and to increase the sell price for [Freedom Cash](https://github.com/monique-baumann/FreedomCash). It utilizes [Bollinger Bands](https://www.youtube.com/watch?v=-6cbdJulb7s) and [sleep](https://deno.land/x/sleep). 
+This module is utilized e.g. to stabilize the buy price and to increase the sell price for [Freedom Cash](https://github.com/monique-baumann/FreedomCash).  
+It utilizes [Bollinger Bands](https://www.youtube.com/watch?v=-6cbdJulb7s) and [sleep](https://deno.land/x/sleep). 
 
 ## Usage Example
 ```ts
 
-import { InvestorServiceBBBased } from "./src/investor-service.ts"
+import { InvestorServiceBBBased } from "https://deno.land/x/freedom_cash_investor/src/investor-service.ts"
 
 const investorServiceBBBased: InvestorServiceBBBased = new InvestorServiceBBBased(27)
 const minHistoryLength = 3
