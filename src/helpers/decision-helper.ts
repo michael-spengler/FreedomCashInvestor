@@ -3,7 +3,7 @@
 
 import { IBollingerBands, BollingerBandsService } from "https://deno.land/x/bollinger_bands/mod.ts"
 
-export class InvestorServiceBBBased {
+export class DecisionHelper {
     private priceHistory: number[]
     private relevantHistoryLength: number
     public constructor(relevantHistoryLength: number) {
@@ -24,7 +24,10 @@ export class InvestorServiceBBBased {
         return BollingerBandsService.getBollingerBands(this.priceHistory, factor)
     }
     public getInvestmentDecision(minHistoryLength: number, factor: number = 2): string {
-        if(this.priceHistory.length < minHistoryLength) { return "hold" }
+        if(this.priceHistory.length < minHistoryLength) { 
+            console.log(`We need to wait ${this.priceHistory.length - minHistoryLength} more intervals before we receive investment decisions.`)
+            return "hold" 
+        }
         const currentPrice = this.priceHistory[this.priceHistory.length - 1]
         console.log(`price: ${currentPrice}`)
         const wouldBuyAt = this.getBollingerBands(factor).lower[this.priceHistory.length - 1]

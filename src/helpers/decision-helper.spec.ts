@@ -1,9 +1,9 @@
 // I buy and sell https://FreedomCash.org 
 
 import { assertEquals } from "https://deno.land/std@0.210.0/testing/asserts.ts"
-import { InvestorServiceBBBased } from "./investor-service.ts"
+import { DecisionHelper } from "./decision-helper.ts"
 
-const investorServiceBBBased: InvestorServiceBBBased = new InvestorServiceBBBased(27)
+const investorServiceBBBased: DecisionHelper = new DecisionHelper(27)
 const minHistoryLength = 3
 
 Deno.test("getInvestmentDecision buy", async () => {
