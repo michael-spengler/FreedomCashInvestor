@@ -12,17 +12,28 @@ export class Broker {
         this.provider = this.blockchainHelper.getProvider()
         this.contract = this.blockchainHelper.getContract()        
     } 
-    public async voteForInvestment(asset: string, amountToBeBought: number) {
+
+    public async voteFor(voteType: string, asset: string, amountToBeBought: number, text?: string): Promise<void> {
+        console.log(`voting for ${voteType}`)
         let balance = await this.contract.balanceOf(BlockchainHelper.FC)
         console.log(`sc balance before: ${balance}`)
         const amountInWei = this.getAmountInWei(amountToBeBought)
         const bPrice = BigInt(await this.contract.getBuyPrice(amountInWei));
         const bcost = BigInt(amountToBeBought) * bPrice;
-        let transaction = await this.contract.voteForInvestmentIn(asset, bPrice, amountInWei, { value: bcost })
+        let transaction
+        if (voteType == "investmentBet"){
+            transaction = await this.contract.voteForInvestmentIn(asset, bPrice, amountInWei, { value: bcost })
+        } else if (voteType == "publicGoodsFunding"){
+             transaction = await this.contract.voteForPublicGood(asset, bPrice, amountInWei, { value: bcost })            
+        } else if (voteType == "geoCashing"){
+            transaction = await this.contract.voteForGeoCash(asset, text, bPrice, amountInWei, { value: bcost })
+        } 
         await transaction.wait()
         balance = await this.contract.balanceOf(BlockchainHelper.FC)
         console.log(`sc balance after : ${balance}`)
     }
+
+ 
     public getAmountInWei(amountToBeBought: number): BigInt {
         return BigInt(ethers.parseEther(amountToBeBought.toString()));
     }
@@ -46,18 +57,7 @@ export class Broker {
             alert(error.message);
         }
     }
-    public async voteForGeoCash(gcAddress: string, text: string, amountToBeBought: number): Promise<void> {
-        console.log("voting for GeoCash")
-        let balance = await this.contract.balanceOf(BlockchainHelper.FC)
-        console.log(`sc balance before: ${balance}`)
-        const amountInWei = this.getAmountInWei(amountToBeBought)
-        const bPrice = BigInt(await this.contract.getBuyPrice(amountInWei));
-        const bcost = BigInt(amountToBeBought) * bPrice;
-        let transaction = await this.contract.voteForGeoCash(gcAddress, text, bPrice, amountInWei, { value: bcost })
-        await transaction.wait()
-        balance = await this.contract.balanceOf(BlockchainHelper.FC)
-        console.log(`sc balance after : ${balance}`)
-    }
+
     public async takeProfits(): Promise<void> {
         console.log("taking profits")
         return
@@ -68,10 +68,6 @@ export class Broker {
     }
     public async sendETHWithMessage(): Promise<void> {
         console.log("sending ETH with Message")
-        return
-    }
-    public async voteForPublicGood(): Promise<void> {
-        console.log("voting for Public Good")
         return
     }
     public async getBuyPrice(amountToBeBought: number): Promise<BigInt> {
@@ -86,7 +82,9 @@ const bHelper = await BlockchainHelper.getInstance()
 const broker = new Broker(bHelper)
 const buyPrice = await broker.getBuyPrice(9)
 console.log(buyPrice)
-await broker.voteForGeoCash(BlockchainHelper.UNI, "geil", 9)
+await broker.voteFor("investmentBet", BlockchainHelper.UNI, 9)
+await broker.voteFor("publicGoodsFunding", BlockchainHelper.UNI, 9)
+await broker.voteFor("geoCashing", BlockchainHelper.UNI, 9, "geil")
 
 // let transaction = await contractWithTestWalletAsSigner.voteForInvestmentIn(UNI, bPrice, aToBeBoughtInWei, { value: bcost })
     // await tx.wait()
