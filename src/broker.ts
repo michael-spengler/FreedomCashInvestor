@@ -33,7 +33,6 @@ export class Broker {
         console.log(`sc balance after : ${balance}`)
     }
 
- 
     public getAmountInWei(amountToBeBought: number): BigInt {
         return BigInt(ethers.parseEther(amountToBeBought.toString()));
     }
@@ -42,33 +41,52 @@ export class Broker {
         const sellPrice = await this.contract.getSellPrice()
         await this.contract.sellFreedomCash(ethers.parseEther(amount.toString()), sellPrice)  
     }
-    public async executeCommunityInvestment() {
+    public async executeCommunityInvestment(asset: string, poolFee: number, maxSlip: number) {
         console.log("executing community investment")
-        const amountOutMinimum = 
-        await this.contract.getAmountOutMinimum(BlockchainHelper.WETH, BlockchainHelper.UNI, BigInt(3 * 10 ** 15), 3000, 30)
-        console.log(Number(amountOutMinimum))
+        // const amountOutMinimum = 
+        // await this.contract.getAmountOutMinimum(BlockchainHelper.WETH, BlockchainHelper.UNI, BigInt(3 * 10 ** 15), 3000, 30)
+        // console.log(Number(amountOutMinimum))
+        const investmentBudget = await this.contract.investmentBudget()
+        if (investmentBudget < BigInt(99*10**15)) {
+            throw new Error(`investment budget only at ${BigInt(investmentBudget)}` )
+        }
         try {
-            const txObject = await this.contract.executeCommunityInvestment(BlockchainHelper.UNI, 3000, 30);
-            const gasLimit = await this.provider.estimateGas(txObject.data);
-            const gasPrice = (await this.provider.getGasPrice()) * 9;
-            let result = await this.contract.executeCommunityInvestment(BlockchainHelper.UNI, 3000, 30, { gasLimit, gasPrice });
+            console.log("ho")
+            // const gasPrice = (await this.provider.getGasPrice()) * 9;
+            console.log("hi")
+            let result = await this.contract.executeCommunityInvestment(BlockchainHelper.UNI, poolFee, maxSlip);
             console.log(`result: ${result}`);
         } catch (error) {
             alert(error.message);
         }
     }
 
-    public async takeProfits(): Promise<void> {
+    public async takeProfits(asset: string, amount: number, poolFee: number, maxSlip: number): Promise<void> {
         console.log("taking profits")
-        return
+        const buyPrice = await this.contract.getBuyPrice(this.getAmountInWei(1))
+        const sellPrice = await this.contract.getSellPrice()
+        if ((sellPrice + (sellPrice * (BigInt(9) / BigInt(100)))) > buyPrice) { 
+            throw new Error("no need to sell atm")
+        }
+        try {
+            const txObject = await this.contract.takeProfits(asset, BigInt(amount), poolFee, maxSlip);
+            // const gasLimit = await this.provider.estimateGas(txObject.data);
+            // const gasPrice = (await this.provider.getGasPrice()) * 9;
+            // let result = await this.contract.takeProfits(asset, BigInt(amount), poolFee, maxSlip, { gasLimit, gasPrice });
+            // console.log(`result: ${result}`);
+        } catch (error) {
+            alert(error.message);
+        }        
     }
     public async swipSwapV3Service(): Promise<void> {
         console.log("using the SwipSwapV3Service")
         return
     }
-    public async sendETHWithMessage(): Promise<void> {
+    public async sendETHWithMessage(target: string, message: string, amount: number): Promise<void> {
         console.log("sending ETH with Message")
-        return
+        const encodedMessage = ethers.encodeBytes32String(message)
+        await this.contract.sendETHWithMessage(encodedMessage, {value: BigInt(amount)})
+
     }
     public async getBuyPrice(amountToBeBought: number): Promise<BigInt> {
         const aToBeBought = BigInt(amountToBeBought);
@@ -82,10 +100,12 @@ const bHelper = await BlockchainHelper.getInstance()
 const broker = new Broker(bHelper)
 const buyPrice = await broker.getBuyPrice(9)
 console.log(buyPrice)
-await broker.voteFor("investmentBet", BlockchainHelper.UNI, 9)
-await broker.voteFor("publicGoodsFunding", BlockchainHelper.UNI, 9)
-await broker.voteFor("geoCashing", BlockchainHelper.UNI, 9, "geil")
-
+// await broker.sendETHWithMessage("0x2D1bEB3e41D90d7F9756e92c3061265206a661A2", "super", 9)
+// await broker.voteFor("investmentBet", BlockchainHelper.UNI, 9999)
+// await broker.voteFor("publicGoodsFunding", BlockchainHelper.POD, 999)
+// await broker.voteFor("geoCashing", BlockchainHelper.VITALIK, 999, "geil")
+await broker.executeCommunityInvestment(BlockchainHelper.UNI, 3000, 30)
+// await broker.takeProfits(BlockchainHelper.UNI, 1000, 3000, 70)
 // let transaction = await contractWithTestWalletAsSigner.voteForInvestmentIn(UNI, bPrice, aToBeBoughtInWei, { value: bcost })
     // await tx.wait()
 
@@ -130,7 +150,7 @@ await broker.voteFor("geoCashing", BlockchainHelper.UNI, 9, "geil")
     // 2268931 333183675210471668
 
 
-    // const contractWithTestWalletAsSigner = new ethers.Contract(smartContractAddress, freedomCashABI, testWallet);
+
 
 
 
