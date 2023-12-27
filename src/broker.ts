@@ -1,37 +1,42 @@
 import { ethers } from 'npm:ethers';
-import { Helper } from './helper.ts'
 import { BlockchainHelper } from './helpers/blockchain-helper.ts';
 
 export class Broker {
 
-    private helper: Helper 
+    private blockchainHelper: BlockchainHelper 
     private provider: any
     private contract: any
 
-    public constructor(helper: Helper) {
-        this.helper = helper
-        this.provider = this.helper.getProvider()
-        this.contract = this.helper.getContract()        
+    public constructor(blockchainHelper: BlockchainHelper) {
+        this.blockchainHelper = blockchainHelper
+        this.provider = this.blockchainHelper.getProvider()
+        this.contract = this.blockchainHelper.getContract()        
     } 
-
-    public async voteForInvestment() {
-        const aToBeBought = BigInt(999);
+    public async voteForInvestment(asset: string, amountToBeBought: number) {
+        let balance = await this.contract.balanceOf(BlockchainHelper.FC)
+        console.log(`sc balance before: ${balance}`)
+        const aToBeBought = BigInt(amountToBeBought);
         let aToBeBoughtInWei = BigInt(ethers.parseEther(aToBeBought.toString()));
         const bPrice = BigInt(await this.contract.getBuyPrice(aToBeBoughtInWei));
         const bcost = aToBeBought * bPrice;
-        let transaction = await this.contract.voteForInvestmentIn(BlockchainHelper.UNI, bPrice, aToBeBoughtInWei, { value: bcost })
+        let transaction = await this.contract.voteForInvestmentIn(asset, bPrice, aToBeBoughtInWei, { value: bcost })
         await transaction.wait()
-
-        console.log(Number(bcost))
-
-
+        balance = await this.contract.balanceOf(BlockchainHelper.FC)
+        console.log(`sc balance after : ${balance}`)
     }
-
+    public getAmountToBeBoughtInWei() {
+        
+    }
+    public async sellFreedomCash(amount: number): Promise<void> {
+        console.log("selling Freedom Cash")
+        const sellPrice = await this.contract.getSellPrice()
+        await this.contract.sellFreedomCash(ethers.parseEther(amount.toString()), sellPrice)  
+    }
     public async executeCommunityInvestment() {
+        console.log("executing community investment")
         const amountOutMinimum = 
         await this.contract.getAmountOutMinimum(BlockchainHelper.WETH, BlockchainHelper.UNI, BigInt(3 * 10 ** 15), 3000, 30)
         console.log(Number(amountOutMinimum))
-
         try {
             const txObject = await this.contract.executeCommunityInvestment(BlockchainHelper.UNI, 3000, 30);
             const gasLimit = await this.provider.estimateGas(txObject.data);
@@ -42,10 +47,39 @@ export class Broker {
             alert(error.message);
         }
     }
+    public async voteForGeoCash(): Promise<void> {
+        console.log("voting for GeoCash")
+        return
+    }
+    public async takeProfits(): Promise<void> {
+        console.log("taking profits")
+        return
+    }
+    public async swipSwapV3Service(): Promise<void> {
+        console.log("using the SwipSwapV3Service")
+        return
+    }
+    public async sendETHWithMessage(): Promise<void> {
+        console.log("sending ETH with Message")
+        return
+    }
+    public async voteForPublicGood(): Promise<void> {
+        console.log("voting for Public Good")
+        return
+    }
+    public async getBuyPrice(amountToBeBought: number): Promise<BigInt> {
+        const aToBeBought = BigInt(amountToBeBought);
+        let aToBeBoughtInWei = BigInt(ethers.parseEther(aToBeBought.toString()));
+
+        return BigInt(await this.contract.getBuyPrice(aToBeBoughtInWei));
+    }
 }
 
-
-
+const bHelper = await BlockchainHelper.getInstance()
+const broker = new Broker(bHelper)
+const buyPrice = await broker.getBuyPrice(9)
+console.log(buyPrice)
+await broker.voteForInvestment(BlockchainHelper.UNI, 9)
 
 // let transaction = await contractWithTestWalletAsSigner.voteForInvestmentIn(UNI, bPrice, aToBeBoughtInWei, { value: bcost })
     // await tx.wait()
@@ -65,8 +99,7 @@ export class Broker {
     // const cost = amountToBeBought * buyPrice;
     // console.log(cost)
     // txs.push(await contract.buyFreedomCash(buyPrice, amountToBeBoughtInWei, {value: BigInt(cost)}));
-    // const sellPrice = await contract.getSellPrice()
-    // txs.push(await contract.sellFreedomCash(ethers.parseEther("1"), sellPrice))
+
 
 
 
