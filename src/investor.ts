@@ -1,6 +1,6 @@
 // I buy and sell https://FreedomCash.org 
 
-import { sleep } from "https://deno.land/x/sleep/mod.ts"
+import { sleep } from "https://deno.land/x/sleep@v1.3.0/mod.ts"
 import { BlockchainHelper } from "./helpers/blockchain-helper.ts"
 import { DecisionHelper } from "./helpers/decision-helper.ts"
 import { Broker } from "./broker.ts"
