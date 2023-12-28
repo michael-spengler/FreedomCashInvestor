@@ -1,5 +1,6 @@
-import { Broker } from "../broker.ts"
-import { BlockchainHelper } from "./blockchain-helper.ts"
+import { Broker } from "./broker.ts"
+import { BlockchainHelper } from "./helpers/blockchain-helper.ts"
+import { Logger } from 'https://deno.land/x/log@v1.1.1/mod.ts'
 
 export class Player {
     
@@ -61,14 +62,21 @@ export class Player {
     }
 }
 
+const minLevelForConsole = 'DEBUG' 
+const minLevelForFile = 'WARNING' 
+const fileName = "./warnings-errors.txt"
+const pureInfo = true // leaving out e.g. the time info
+export const logger = await Logger.getInstance(minLevelForConsole, minLevelForFile, fileName, pureInfo)
 
-const bHelper = await BlockchainHelper.getInstance()
-const broker = new Broker(bHelper)
-const buyPrice = await broker.getBuyPrice(9)
-console.log(buyPrice)
-await broker.getInvestmentBudget()
+const providerURL = Deno.args[0]
+console.log(providerURL)
+// const bHelper = await BlockchainHelper.getInstance(providerURL)
+// const broker = new Broker(bHelper, logger)
+// const buyPrice = await broker.getBuyPrice(9)
+// console.log(buyPrice)
+// await broker.getInvestmentBudget()
 // await broker.sendETHWithMessage("0x2D1bEB3e41D90d7F9756e92c3061265206a661A2", "super", 9)
-await broker.voteFor("investmentBet", BlockchainHelper.UNI, 9999)
+// await broker.voteFor("investmentBet", BlockchainHelper.UNI, 9999)
 // await broker.voteFor("publicGoodsFunding", BlockchainHelper.POD, 999)
 // await broker.voteFor("geoCashing", BlockchainHelper.VITALIK, 999, "geil")
 //await broker.sellFreedomCash(999)

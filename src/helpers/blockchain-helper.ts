@@ -1,5 +1,4 @@
 import { ethers } from 'npm:ethers';
-import { pkTestWallet, providerURL } from "../../.env.ts"
 
 export class BlockchainHelper {
 
@@ -15,7 +14,7 @@ export class BlockchainHelper {
 
     public static instance: BlockchainHelper
 
-    public static async getInstance(): Promise<BlockchainHelper> {
+    public static async getInstance(providerURL: string): Promise<BlockchainHelper> {
         if (BlockchainHelper.instance == undefined){
             BlockchainHelper.instance = new BlockchainHelper(providerURL)
             await BlockchainHelper.instance.initializeContract()

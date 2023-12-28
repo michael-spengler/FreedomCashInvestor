@@ -2,6 +2,7 @@
 // import { Investor } from "./src/investor.ts"
 import { Investor } from "https://deno.land/x/freedom_cash_investor/mod.ts"
 import { Logger } from 'https://deno.land/x/log@v1.1.1/mod.ts'
+import { pkTestWallet, providerURL } from "./.env.ts"
 
 const minLevelForConsole = 'DEBUG' 
 const minLevelForFile = 'WARNING' 

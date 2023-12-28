@@ -10,9 +10,9 @@ export class Investor {
 
     public static instance: Investor
 
-    public static async getInstance(historyLength: number, sleepTime: number, logger: Logger): Promise<Investor> {
+    public static async getInstance(historyLength: number, sleepTime: number, logger: Logger, providerURL: string): Promise<Investor> {
         if (Investor.instance == undefined) {
-            const blockchainHelper = await BlockchainHelper.getInstance()
+            const blockchainHelper = await BlockchainHelper.getInstance(providerURL)
             const broker = new Broker(blockchainHelper, logger)
             const decisionHelper = new DecisionHelper(historyLength, logger)
             Investor.instance = new Investor(sleepTime, blockchainHelper, decisionHelper, broker, logger)
