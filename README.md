@@ -5,18 +5,25 @@ This [deno module](https://deno.land/x/freedom_cash_investor) is utilized e.g. t
 It utilizes [Bollinger Bands](https://www.youtube.com/watch?v=-6cbdJulb7s) and [sleep](https://deno.land/x/sleep). 
 
 ## Usage Example
+
+The coolest usage example you might find via https://FreedomCash.org.  
+
 ```ts
-import { InvestorServiceBBBased } from "https://deno.land/x/freedom_cash_investor/src/investor-service.ts"
+import { Investor } from "https://deno.land/x/freedom_cash_investor/mod.ts"
+import { Logger } from 'https://deno.land/x/log@v1.1.1/mod.ts'
 
-const investorServiceBBBased: InvestorServiceBBBased = new InvestorServiceBBBased(27)
+const minLevelForConsole = 'DEBUG' 
+const minLevelForFile = 'WARNING' 
+const fileName = "./warnings-errors.txt"
+const pureInfo = true // leaving out e.g. the time info
+export const logger = await Logger.getInstance(minLevelForConsole, minLevelForFile, fileName, pureInfo)
+
 const minHistoryLength = 3
-
-investorServiceBBBased.addToPriceHistory(6)
-investorServiceBBBased.addToPriceHistory(9)
-investorServiceBBBased.addToPriceHistory(3)
-const investmentDecision = investorServiceBBBased.getInvestmentDecision(minHistoryLength)
-
-console.log(investmentDecision)
+const bFactor = 6
+const sleepTimeInSeconds = 27
+const relevantHistoryLength = 45
+const investor: Investor = await Investor.getInstance(relevantHistoryLength, sleepTimeInSeconds, logger)
+await investor.startTheParty(minHistoryLength, bFactor)
 ```
 
 ## Execute Usage Example
@@ -24,19 +31,11 @@ console.log(investmentDecision)
 deno run https://deno.land/x/freedom_cash_investor/usage-example.ts
 ```
 
-## Execute Demo
-```sh
-deno run https://deno.land/x/freedom_cash_investor/demo.ts
-```
-
 ## Execute Unit Tests
 ```sh
-deno test https://deno.land/x/freedom_cash_investor/src/investor-service.spec.ts
+deno test --allow-all https://deno.land/x/freedom_cash_investor/src/helpers/blockchain-helper.spec.ts
+deno test --allow-all https://deno.land/x/freedom_cash_investor/src/helpers/decision-helper.spec.ts
 ```
-
----
-  
-For further examples you can check the [unit tests](https://github.com/monique-baumann/FreedomCashInvestor/blob/main/src/investor-service.spec.ts).
   
 ## Donations
 Thanks to [Freedom Cash](https://FreedomCash.org), we are already free.  

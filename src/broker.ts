@@ -19,7 +19,7 @@ export class Broker {
     public async voteFor(voteType: string, asset: string, amountToBeBought: number, text?: string): Promise<void> {
         this.logger.info(`voting for ${voteType}`)
         let balance = await this.contract.balanceOf(BlockchainHelper.FC)
-        this.logger.info(`sc balance before: ${balance}`)
+        this.logger.debug(`sc balance before: ${balance}`)
         const amountInWei = this.bcHelper.convertToWei(amountToBeBought)
         const bPrice = await this.contract.getBuyPrice(amountInWei);
         const bcost = BigInt(amountToBeBought) * bPrice;
@@ -33,13 +33,13 @@ export class Broker {
         }
         await transaction.wait()
         balance = await this.contract.balanceOf(BlockchainHelper.FC)
-        this.logger.info(`sc balance after : ${balance}`)
+        this.logger.debug(`sc balance after : ${balance}`)
     }
 
     public async sellFreedomCash(amount: number): Promise<void> {
         this.logger.info("selling Freedom Cash")
         let balance = await this.contract.balanceOf(BlockchainHelper.FC)
-        this.logger.info(`sc balance before: ${balance}`)
+        this.logger.debug(`sc balance before: ${balance}`)
         const sellPrice = await this.contract.getSellPrice()
         await this.contract.sellFreedomCash((this.bcHelper.convertToWei(amount)), sellPrice)
         balance = await this.contract.balanceOf(BlockchainHelper.FC)
@@ -49,17 +49,17 @@ export class Broker {
         this.logger.info("executing community investment")
         // const amountOutMinimum = 
         // await this.contract.getAmountOutMinimum(BlockchainHelper.WETH, BlockchainHelper.UNI, BigInt(3 * 10 ** 15), 3000, 30)
-        // this.logger.info(Number(amountOutMinimum))
+        // this.logger.debug(Number(amountOutMinimum))
         const investmentBudget = await this.contract.investmentBudget()
         if (investmentBudget < BigInt(99 * 10 ** 15)) {
             throw new Error(`investment budget only at ${BigInt(investmentBudget)}`)
         }
         try {
-            this.logger.info("ho")
+            this.logger.debug("ho")
             // const gasPrice = (await this.provider.getGasPrice()) * 9;
-            this.logger.info("hi")
+            this.logger.debug("hi")
             let result = await this.contract.executeCommunityInvestment(BlockchainHelper.UNI, poolFee, maxSlip);
-            this.logger.info(`result: ${result}`);
+            this.logger.debug(`result: ${result}`);
         } catch (error) {
             alert(error.message);
         }
@@ -77,7 +77,7 @@ export class Broker {
             // const gasLimit = await this.provider.estimateGas(txObject.data);
             // const gasPrice = (await this.provider.getGasPrice()) * 9;
             // let result = await this.contract.takeProfits(asset, BigInt(amount), poolFee, maxSlip, { gasLimit, gasPrice });
-            // this.logger.info(`result: ${result}`);
+            // this.logger.debug(`result: ${result}`);
         } catch (error) {
             alert(error.message);
         }
@@ -85,15 +85,15 @@ export class Broker {
     public async getAmountOutMinimum(assetIn: string, assetOut: string, amountIn: number, poolFee: number, maxSlip: number): Promise<number> {
         const amountOutMin =
             await this.contract.getAmountOutMinimum(assetIn, assetOut, amountIn, poolFee, maxSlip)
-        this.logger.info(`amountOutMin: ${amountOutMin}`)
+        this.logger.debug(`amountOutMin: ${amountOutMin}`)
         return amountOutMin
     }
     public async swipSwapV3Service(): Promise<void> {
-        this.logger.info("using the SwipSwapV3Service")
+        this.logger.debug("using the SwipSwapV3Service")
         return
     }
     public async sendETHWithMessage(target: string, message: string, amount: number): Promise<void> {
-        this.logger.info("sending ETH with Message")
+        this.logger.debug("sending ETH with Message")
         const encodedMessage = ethers.encodeBytes32String(message)
         await this.contract.sendETHWithMessage(encodedMessage, { value: BigInt(amount) })
 
@@ -107,7 +107,7 @@ export class Broker {
     public async getInvestmentBudget(): Promise<number> {
         const investmentBudget =
             ethers.formatEther((await this.contract.investmentBudget()).toString())
-        this.logger.info(`investmentBudget: ${investmentBudget}`)
+        this.logger.debug(`investmentBudget: ${investmentBudget}`)
         return investmentBudget
     }
     public async factoryAddress(): Promise<any> {
@@ -204,48 +204,48 @@ export class Broker {
 
     public async logFundamentals(): Promise<void> {
 
-        this.logger.info("\n\n*************************** Master Data ***************************")
-        this.logger.info(`smartContractAddress: ${BlockchainHelper.FC}`)
-        this.logger.info(`totalSupply: ${await this.totalSupply()}`)
-        this.logger.info(`symbol: ${await this.symbol()}`)
-        this.logger.info(`decimals: ${await this.decimals()}`)
-        this.logger.info(`routerAddress: ${await this.routerAddress()}`)
-        this.logger.info(`factoryAddress: ${await this.factoryAddress()}`)
-        this.logger.info(`wethAddress: ${await this.wethAddress()}`)
+        this.logger.info("\n\n*************************** Checking Master Data ***************************")
+        this.logger.debug(`smartContractAddress: ${BlockchainHelper.FC}`)
+        this.logger.debug(`totalSupply: ${await this.totalSupply()}`)
+        this.logger.debug(`symbol: ${await this.symbol()}`)
+        this.logger.debug(`decimals: ${await this.decimals()}`)
+        this.logger.debug(`routerAddress: ${await this.routerAddress()}`)
+        this.logger.debug(`factoryAddress: ${await this.factoryAddress()}`)
+        this.logger.debug(`wethAddress: ${await this.wethAddress()}`)
 
-        this.logger.info("\n\n*************************** Budget Data ***************************")
-        this.logger.info(`amountOfETHInSmartContract: ${await this.amountOfETHInSmartContract()}`)
-        this.logger.info(`balanceOf Smart Contract: ${await this.balanceOf()}`)
-        this.logger.info(`investmentBudget: ${await this.investmentBudget()}`)
-        this.logger.info(`publicGoodsFundingBudget: ${await this.publicGoodsFundingBudget()}`)
-        this.logger.info(`geoCashingBudget: ${await this.geoCashingBudget()}`)
+        this.logger.info("\n\n*************************** Checking Budget Data ***************************")
+        this.logger.debug(`amountOfETHInSmartContract: ${await this.amountOfETHInSmartContract()}`)
+        this.logger.debug(`balanceOf Smart Contract: ${await this.balanceOf()}`)
+        this.logger.debug(`investmentBudget: ${await this.investmentBudget()}`)
+        this.logger.debug(`publicGoodsFundingBudget: ${await this.publicGoodsFundingBudget()}`)
+        this.logger.debug(`geoCashingBudget: ${await this.geoCashingBudget()}`)
 
-        this.logger.info("\n\n*************************** Gaming Data ***************************")
-        this.logger.info(`addressOfHighestSoFarInvestment: ${await this.addressOfHighestSoFarInvestment()}`)
-        this.logger.info(`addressOfHighestSoFarPublicGood: ${await this.addressOfHighestSoFarPublicGood()}`)
-        this.logger.info(`addressOfHighestSoFarGeoCash: ${await this.addressOfHighestSoFarGeoCash()}`)
+        this.logger.info("\n\n*************************** Checking Gaming Data ***************************")
+        this.logger.debug(`addressOfHighestSoFarInvestment: ${await this.addressOfHighestSoFarInvestment()}`)
+        this.logger.debug(`addressOfHighestSoFarPublicGood: ${await this.addressOfHighestSoFarPublicGood()}`)
+        this.logger.debug(`addressOfHighestSoFarGeoCash: ${await this.addressOfHighestSoFarGeoCash()}`)
 
-        this.logger.info("\n\n*************************** Operational Data ***************************")
-        this.logger.info(`iCCounter: ${await this.iCCounter()}`)
-        this.logger.info(`pGCCounter: ${await this.pGCCounter()}`)
-        this.logger.info(`gCCCounter: ${await this.gCCCounter()}`)
-        this.logger.info(`iCIDsAtFC: ${await this.iCIDAt(BlockchainHelper.FC)}`)
-        this.logger.info(`pGCIDsAtOPDonations: ${await this.pGCIDAt(BlockchainHelper.FC)}`)
-        this.logger.info(`gCCIDsAtVitalik: ${await this.gCCIDAt(BlockchainHelper.FC)}`)
-        this.logger.info(`poolAddress: ${await this.getPoolAddress(BlockchainHelper.WETH, BlockchainHelper.UNI, 3000)}`)
-        this.logger.info(`investmentPriceForAsset: ${await this.investmentPriceForAsset(BlockchainHelper.CULT, await this.getPoolAddress(BlockchainHelper.WETH, BlockchainHelper.UNI, 3000))}`)
-        this.logger.info(`amountOutMinimum: ${await this.amountOutMinimum(BlockchainHelper.WETH, BlockchainHelper.UNI, this.bcHelper.convertToWei(9), 3000, 30)}`)
-        this.logger.info(`investmentCandidatesAt0: ${await this.investmentCandidatesAt(0)}`)
-        this.logger.info(`investmentCandidatesAt1: ${await this.investmentCandidatesAt(1)}`)
-        this.logger.info(`publicGoodCandidatesAt0: ${await this.publicGoodCandidatesAt(0)}`)
-        this.logger.info(`publicGoodCandidatesAt1: ${await this.publicGoodCandidatesAt(1)}`)
-        this.logger.info(`geoCashingCandidatesAt0: ${await this.geoCashingCandidatesAt(0)}`)
-        this.logger.info(`geoCashingCandidatesAt1: ${await this.geoCashingCandidatesAt(1)}`)
-        this.logger.info(`allowance from contract to router: ${await this.allowance(BlockchainHelper.FC, BlockchainHelper.ROUTER)}`)
+        this.logger.info("\n\n*************************** Checking Operational Data ***************************")
+        this.logger.debug(`iCCounter: ${await this.iCCounter()}`)
+        this.logger.debug(`pGCCounter: ${await this.pGCCounter()}`)
+        this.logger.debug(`gCCCounter: ${await this.gCCCounter()}`)
+        this.logger.debug(`iCIDsAtFC: ${await this.iCIDAt(BlockchainHelper.FC)}`)
+        this.logger.debug(`pGCIDsAtOPDonations: ${await this.pGCIDAt(BlockchainHelper.FC)}`)
+        this.logger.debug(`gCCIDsAtVitalik: ${await this.gCCIDAt(BlockchainHelper.FC)}`)
+        this.logger.debug(`poolAddress: ${await this.getPoolAddress(BlockchainHelper.WETH, BlockchainHelper.UNI, 3000)}`)
+        this.logger.debug(`investmentPriceForAsset: ${await this.investmentPriceForAsset(BlockchainHelper.CULT, await this.getPoolAddress(BlockchainHelper.WETH, BlockchainHelper.UNI, 3000))}`)
+        this.logger.debug(`amountOutMinimum: ${await this.amountOutMinimum(BlockchainHelper.WETH, BlockchainHelper.UNI, this.bcHelper.convertToWei(9), 3000, 30)}`)
+        this.logger.debug(`investmentCandidatesAt0: ${await this.investmentCandidatesAt(0)}`)
+        this.logger.debug(`investmentCandidatesAt1: ${await this.investmentCandidatesAt(1)}`)
+        this.logger.debug(`publicGoodCandidatesAt0: ${await this.publicGoodCandidatesAt(0)}`)
+        this.logger.debug(`publicGoodCandidatesAt1: ${await this.publicGoodCandidatesAt(1)}`)
+        this.logger.debug(`geoCashingCandidatesAt0: ${await this.geoCashingCandidatesAt(0)}`)
+        this.logger.debug(`geoCashingCandidatesAt1: ${await this.geoCashingCandidatesAt(1)}`)
+        this.logger.debug(`allowance from contract to router: ${await this.allowance(BlockchainHelper.FC, BlockchainHelper.ROUTER)}`)
 
-        this.logger.info("\n\n*************************** Pricing Data ***************************")
-        this.logger.info(`buyPrice: ${await this.buyPrice(this.bcHelper.convertToWei(9))}`)
-        this.logger.info(`sellPrice: ${await this.sellPrice()}`)
+        this.logger.info("\n\n*************************** Checking Pricing Data ***************************")
+        this.logger.debug(`buyPrice: ${await this.buyPrice(this.bcHelper.convertToWei(9))}`)
+        this.logger.debug(`sellPrice: ${await this.sellPrice()}`)
     }
 
 }

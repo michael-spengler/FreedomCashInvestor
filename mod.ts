@@ -1,1 +1,5 @@
-export * from "./src/investor-service.ts"
+export * from "./src/investor.ts"
+export * from "./src/broker.ts"
+export * from "./src/blockchain-helper.ts"
+export * from "./src/decision-helper.ts"
+export * from "./src/player.ts"
