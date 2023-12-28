@@ -1,7 +1,7 @@
 // I buy and sell https://FreedomCash.org 
 import { Investor } from "./src/investor.ts"
 // import { Investor } from "https://deno.land/x/freedom_cash_investor/mod.ts"
-import { Logger } from 'https://deno.land/x/log/mod.ts'
+import { Logger } from 'https://deno.land/x/log@v1.1.1/mod.ts'
 
 
 export const logger = await getLogger()
@@ -46,7 +46,7 @@ async function getLogger(): Promise<Logger> {
 
 }
 
-function getProviderURL(logger: Logger): string|void {
+function getProviderURL(logger: Logger): string | void {
     let configuration: any = {}
     if (Deno.args[0] !== undefined) { // supplying your provider URL via parameter
         return Deno.args[0]

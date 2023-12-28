@@ -1,8 +1,8 @@
 // This code is utilized e.g. to stabilize the buy price and to increase the sell price for Freedom Cash
 // https://github.com/monique-baumann/FreedomCash 
 
-import { IBollingerBands, BollingerBandsService } from "https://deno.land/x/bollinger_bands/mod.ts"
-import { Logger } from 'https://deno.land/x/log/mod.ts'
+import { IBollingerBands, BollingerBandsService } from "https://deno.land/x/bollinger_bands@v0.3.0/mod.ts"
+import { Logger } from 'https://deno.land/x/log@v1.1.1/mod.ts'
 
 export class DecisionHelper {
     private priceHistory: number[]

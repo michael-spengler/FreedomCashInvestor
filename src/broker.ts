@@ -1,6 +1,6 @@
-import { ethers } from 'npm:ethers';
+import { ethers } from 'npm:ethers@6.9.1';
 import { BlockchainHelper } from './helpers/blockchain-helper.ts';
-import { Logger } from 'https://deno.land/x/log/mod.ts'
+import { Logger } from 'https://deno.land/x/log@v1.1.1/mod.ts'
 
 export class Broker {
 

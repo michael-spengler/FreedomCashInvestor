@@ -4,7 +4,7 @@ import { sleep } from "https://deno.land/x/sleep/mod.ts"
 import { BlockchainHelper } from "./helpers/blockchain-helper.ts"
 import { DecisionHelper } from "./helpers/decision-helper.ts"
 import { Broker } from "./broker.ts"
-import { Logger } from 'https://deno.land/x/log/mod.ts'
+import { Logger } from 'https://deno.land/x/log@v1.1.1/mod.ts'
 
 export class Investor {
 

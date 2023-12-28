@@ -2,7 +2,7 @@
 import { Investor } from "../src/investor.ts"
 import { BlockchainHelper } from "../src/helpers/blockchain-helper.ts"
 // import { Investor } from "https://deno.land/x/freedom_cash_investor/mod.ts"
-import { Logger } from 'https://deno.land/x/log/mod.ts'
+import { Logger } from 'https://deno.land/x/log@v1.1.1/mod.ts'
 import { Broker } from "../src/broker.ts"
 import { Player } from "../src/player.ts"
 
@@ -25,7 +25,7 @@ async function getLogger(): Promise<Logger> {
 
 }
 
-function getProviderURL(logger: Logger): string|void {
+function getProviderURL(logger: Logger): string | void {
     let configuration: any = {}
     if (Deno.args[0] !== undefined) { // supplying your provider URL via parameter
         return Deno.args[0]

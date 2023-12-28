@@ -1,4 +1,4 @@
-import { ethers } from 'npm:ethers';
+import { ethers } from 'npm:ethers@6.9.1';
 
 export class BlockchainHelper {
 
