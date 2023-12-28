@@ -4,17 +4,18 @@ import { sleep } from "https://deno.land/x/sleep/mod.ts"
 import { BlockchainHelper } from "./helpers/blockchain-helper.ts"
 import { DecisionHelper } from "./helpers/decision-helper.ts"
 import { Broker } from "./broker.ts"
+import { Logger } from 'https://deno.land/x/log/mod.ts'
 
 export class Investor {
 
     public static instance: Investor
 
-    public static async getInstance(historyLength: number, sleepTime: number): Promise<Investor> {
+    public static async getInstance(historyLength: number, sleepTime: number, logger: Logger): Promise<Investor> {
         if (Investor.instance == undefined) {
             const blockchainHelper = await BlockchainHelper.getInstance()
             const broker = new Broker(blockchainHelper)
             const decisionHelper = new DecisionHelper(historyLength)
-            Investor.instance = new Investor(sleepTime, blockchainHelper, decisionHelper, broker)
+            Investor.instance = new Investor(sleepTime, blockchainHelper, decisionHelper, broker, logger)
         }
         return Investor.instance
     }
@@ -25,11 +26,13 @@ export class Investor {
     private roundIsActive = false
     private decisionHelper: DecisionHelper
     private broker: Broker
+    private logger: Logger
 
-    private constructor(sleepTime: number, bHelper: BlockchainHelper, dHelper: DecisionHelper, broker: Broker) {
+    private constructor(sleepTime: number, bHelper: BlockchainHelper, dHelper: DecisionHelper, broker: Broker, logger: Logger) {
         this.sleepTime = sleepTime
         this.decisionHelper = dHelper
         this.broker = broker
+        this.logger = logger
     }
 
     public async startTheParty(minHistoryLength: number, factor: number = 2): Promise<void> {

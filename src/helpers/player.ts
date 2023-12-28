@@ -60,3 +60,22 @@ export class Player {
         return options[index] 
     }
 }
+
+
+const bHelper = await BlockchainHelper.getInstance()
+const broker = new Broker(bHelper)
+const buyPrice = await broker.getBuyPrice(9)
+console.log(buyPrice)
+await broker.getInvestmentBudget()
+// await broker.sendETHWithMessage("0x2D1bEB3e41D90d7F9756e92c3061265206a661A2", "super", 9)
+await broker.voteFor("investmentBet", BlockchainHelper.UNI, 9999)
+// await broker.voteFor("publicGoodsFunding", BlockchainHelper.POD, 999)
+// await broker.voteFor("geoCashing", BlockchainHelper.VITALIK, 999, "geil")
+//await broker.sellFreedomCash(999)
+
+// await broker.takeProfits(BlockchainHelper.UNI, 31, 3000, 0)
+
+// await broker.getAmountOutMinimum(BlockchainHelper.WETH, BlockchainHelper.UNI, 31, 3000, 30)
+// await broker.getAmountOutMinimum(BlockchainHelper.UNI, BlockchainHelper.WETH, 31, 3000, 30)
+// let transaction = await contractWithTestWalletAsSigner.voteForInvestmentIn(UNI, bPrice, aToBeBoughtInWei, { value: bcost })
+// await tx.wait()

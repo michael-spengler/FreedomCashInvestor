@@ -4,29 +4,31 @@ import { BlockchainHelper } from "./helpers/blockchain-helper.ts"
 import { DecisionHelper } from "./helpers/decision-helper.ts"
 import { Broker } from "./broker.ts";
 import { TestPlayer } from "./helpers/test-player";
+import { Logger } from 'https://deno.land/x/log/mod.ts'
 
 
 export class Monique extends Investor {
 
     public static instance: Monique
 
-    public static async getInstance(historyLength: number, sleepTime: number): Promise<Investor> {
+    public static async getInstance(historyLength: number, sleepTime: number, logger: Logger): Promise<Investor> {
         if (Investor.instance == undefined) {
             const bHelper = await BlockchainHelper.getInstance()
             const broker = new Broker(bHelper)
             const dHelper = new DecisionHelper(historyLength)
-            Investor.instance = new Monique(sleepTime, bHelper, dHelper, broker)
+            Investor.instance = new Monique(sleepTime, bHelper, dHelper, broker, logger)
         }
         return Investor.instance
     }
 
-    protected broker: Broker
-
+    private broker: Broker
     private player: TestPlayer
+    private logger: Logger 
 
-    private constructor(sleepTime: number, bHelper: BlockchainHelper, dHelper: DecisionHelper, broker: Broker) {
+    private constructor(sleepTime: number, bHelper: BlockchainHelper, dHelper: DecisionHelper, broker: Broker, logger: Logger) {
         super(sleepTime, bHelper, dHelper, broker)
         this.broker = broker
+        this.logger = logger
     }
 
     protected async getBuyPrice(amountToBeBought: number): Promise<number> {
