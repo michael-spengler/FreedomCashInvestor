@@ -3,22 +3,22 @@ import { BlockchainHelper } from './helpers/blockchain-helper.ts';
 
 export class Broker {
 
-    private blockchainHelper: BlockchainHelper
+    private bcHelper: BlockchainHelper
     private provider: any
     private contract: any
 
-    public constructor(blockchainHelper: BlockchainHelper) {
-        this.blockchainHelper = blockchainHelper
-        this.provider = this.blockchainHelper.getProvider()
-        this.contract = this.blockchainHelper.getContract()
+    public constructor(bcHelper: BlockchainHelper) {
+        this.bcHelper = bcHelper
+        this.provider = this.bcHelper.getProvider()
+        this.contract = this.bcHelper.getContract()
     }
 
     public async voteFor(voteType: string, asset: string, amountToBeBought: number, text?: string): Promise<void> {
         console.log(`voting for ${voteType}`)
         let balance = await this.contract.balanceOf(BlockchainHelper.FC)
         console.log(`sc balance before: ${balance}`)
-        const amountInWei = this.getAmountInWei(amountToBeBought)
-        const bPrice = BigInt(await this.contract.getBuyPrice(amountInWei));
+        const amountInWei = this.bcHelper.convertToWei(amountToBeBought)
+        const bPrice = await this.contract.getBuyPrice(amountInWei);
         const bcost = BigInt(amountToBeBought) * bPrice;
         let transaction
         if (voteType == "investmentBet") {
@@ -33,15 +33,12 @@ export class Broker {
         console.log(`sc balance after : ${balance}`)
     }
 
-    public getAmountInWei(amountToBeBought: number): BigInt {
-        return BigInt(ethers.parseEther(amountToBeBought.toString()));
-    }
     public async sellFreedomCash(amount: number): Promise<void> {
         console.log("selling Freedom Cash")
         let balance = await this.contract.balanceOf(BlockchainHelper.FC)
         console.log(`sc balance before: ${balance}`)
         const sellPrice = await this.contract.getSellPrice()
-        await this.contract.sellFreedomCash((this.getAmountInWei(amount)), sellPrice)
+        await this.contract.sellFreedomCash((this.bcHelper.convertToWei(amount)), sellPrice)
         balance = await this.contract.balanceOf(BlockchainHelper.FC)
         console.log(`sc balance after : ${balance}`)
     }
@@ -67,7 +64,7 @@ export class Broker {
 
     public async takeProfits(asset: string, amount: number, poolFee: number, maxSlip: number): Promise<void> {
         console.log("taking profits")
-        const buyPrice = await this.contract.getBuyPrice(this.getAmountInWei(amount))
+        const buyPrice = await this.contract.getBuyPrice(this.bcHelper.convertToWei(amount))
         const sellPrice = await this.contract.getSellPrice()
         if ((sellPrice + (sellPrice * (BigInt(amount) / BigInt(100)))) > buyPrice) {
             throw new Error("no need to sell atm")
@@ -193,7 +190,7 @@ export class Broker {
         return this.contract.allowance(owner, spender)
     }
     public async buyPrice(amountToBeBought: number): Promise<any> {
-        return this.contract.getBuyPrice(ethers.parseEther(amountToBeBought.toString()))
+        return this.contract.getBuyPrice(this.bcHelper.convertToWei(amountToBeBought))
     }
     public async sellPrice(): Promise<any> {
         return this.contract.getSellPrice()
@@ -204,47 +201,47 @@ export class Broker {
 
     public async logFundamentals(): Promise<void> {
 
-        // console.log("\n\n*************************** Master Data ***************************")
-        // console.log(`smartContractAddress: ${BlockchainHelper.FC}`)
-        // console.log(`totalSupply: ${await this.totalSupply()}`)
-        // console.log(`symbol: ${await this.symbol()}`)
-        // console.log(`decimals: ${await this.decimals()}`)
-        // console.log(`routerAddress: ${await this.routerAddress()}`)
-        // console.log(`factoryAddress: ${await this.factoryAddress()}`)
-        // console.log(`wethAddress: ${await this.wethAddress()}`)
+        console.log("\n\n*************************** Master Data ***************************")
+        console.log(`smartContractAddress: ${BlockchainHelper.FC}`)
+        console.log(`totalSupply: ${await this.totalSupply()}`)
+        console.log(`symbol: ${await this.symbol()}`)
+        console.log(`decimals: ${await this.decimals()}`)
+        console.log(`routerAddress: ${await this.routerAddress()}`)
+        console.log(`factoryAddress: ${await this.factoryAddress()}`)
+        console.log(`wethAddress: ${await this.wethAddress()}`)
 
-        // console.log("\n\n*************************** Budget Data ***************************")
-        // console.log(`amountOfETHInSmartContract: ${await this.amountOfETHInSmartContract()}`)
-        // console.log(`balanceOf Smart Contract: ${await this.balanceOf()}`)
-        // console.log(`investmentBudget: ${await this.investmentBudget()}`)
-        // console.log(`publicGoodsFundingBudget: ${await this.publicGoodsFundingBudget()}`)
-        // console.log(`geoCashingBudget: ${await this.geoCashingBudget()}`)
+        console.log("\n\n*************************** Budget Data ***************************")
+        console.log(`amountOfETHInSmartContract: ${await this.amountOfETHInSmartContract()}`)
+        console.log(`balanceOf Smart Contract: ${await this.balanceOf()}`)
+        console.log(`investmentBudget: ${await this.investmentBudget()}`)
+        console.log(`publicGoodsFundingBudget: ${await this.publicGoodsFundingBudget()}`)
+        console.log(`geoCashingBudget: ${await this.geoCashingBudget()}`)
 
-        // console.log("\n\n*************************** Gaming Data ***************************")
-        // console.log(`addressOfHighestSoFarInvestment: ${await this.addressOfHighestSoFarInvestment()}`)
-        // console.log(`addressOfHighestSoFarPublicGood: ${await this.addressOfHighestSoFarPublicGood()}`)
-        // console.log(`addressOfHighestSoFarGeoCash: ${await this.addressOfHighestSoFarGeoCash()}`)
+        console.log("\n\n*************************** Gaming Data ***************************")
+        console.log(`addressOfHighestSoFarInvestment: ${await this.addressOfHighestSoFarInvestment()}`)
+        console.log(`addressOfHighestSoFarPublicGood: ${await this.addressOfHighestSoFarPublicGood()}`)
+        console.log(`addressOfHighestSoFarGeoCash: ${await this.addressOfHighestSoFarGeoCash()}`)
 
-        // console.log("\n\n*************************** Operational Data ***************************")
-        // console.log(`iCCounter: ${await this.iCCounter()}`)
-        // console.log(`pGCCounter: ${await this.pGCCounter()}`)
-        // console.log(`gCCCounter: ${await this.gCCCounter()}`)
-        // console.log(`iCIDsAtFC: ${await this.iCIDAt(BlockchainHelper.FC)}`)
-        // console.log(`pGCIDsAtOPDonations: ${await this.pGCIDAt(BlockchainHelper.FC)}`)
-        // console.log(`gCCIDsAtVitalik: ${await this.gCCIDAt(BlockchainHelper.FC)}`)
-        // console.log(`poolAddress: ${await this.getPoolAddress(BlockchainHelper.WETH, BlockchainHelper.UNI, 3000)}`)
-        // console.log(`investmentPriceForAsset: ${await this.investmentPriceForAsset(BlockchainHelper.CULT, await this.getPoolAddress(BlockchainHelper.WETH, BlockchainHelper.UNI, 3000))}`)
-        // console.log(`amountOutMinimum: ${await this.amountOutMinimum(BlockchainHelper.WETH, BlockchainHelper.UNI, BigInt(9), 3000, 30)}`)
-        // console.log(`investmentCandidatesAt0: ${await this.investmentCandidatesAt(0)}`)
-        // console.log(`investmentCandidatesAt1: ${await this.investmentCandidatesAt(1)}`)
-        // console.log(`publicGoodCandidatesAt0: ${await this.publicGoodCandidatesAt(0)}`)
-        // console.log(`publicGoodCandidatesAt1: ${await this.publicGoodCandidatesAt(1)}`)
-        // console.log(`geoCashingCandidatesAt0: ${await this.geoCashingCandidatesAt(0)}`)
-        // console.log(`geoCashingCandidatesAt1: ${await this.geoCashingCandidatesAt(1)}`)
+        console.log("\n\n*************************** Operational Data ***************************")
+        console.log(`iCCounter: ${await this.iCCounter()}`)
+        console.log(`pGCCounter: ${await this.pGCCounter()}`)
+        console.log(`gCCCounter: ${await this.gCCCounter()}`)
+        console.log(`iCIDsAtFC: ${await this.iCIDAt(BlockchainHelper.FC)}`)
+        console.log(`pGCIDsAtOPDonations: ${await this.pGCIDAt(BlockchainHelper.FC)}`)
+        console.log(`gCCIDsAtVitalik: ${await this.gCCIDAt(BlockchainHelper.FC)}`)
+        console.log(`poolAddress: ${await this.getPoolAddress(BlockchainHelper.WETH, BlockchainHelper.UNI, 3000)}`)
+        console.log(`investmentPriceForAsset: ${await this.investmentPriceForAsset(BlockchainHelper.CULT, await this.getPoolAddress(BlockchainHelper.WETH, BlockchainHelper.UNI, 3000))}`)
+        console.log(`amountOutMinimum: ${await this.amountOutMinimum(BlockchainHelper.WETH, BlockchainHelper.UNI, this.bcHelper.convertToWei(9), 3000, 30)}`)
+        console.log(`investmentCandidatesAt0: ${await this.investmentCandidatesAt(0)}`)
+        console.log(`investmentCandidatesAt1: ${await this.investmentCandidatesAt(1)}`)
+        console.log(`publicGoodCandidatesAt0: ${await this.publicGoodCandidatesAt(0)}`)
+        console.log(`publicGoodCandidatesAt1: ${await this.publicGoodCandidatesAt(1)}`)
+        console.log(`geoCashingCandidatesAt0: ${await this.geoCashingCandidatesAt(0)}`)
+        console.log(`geoCashingCandidatesAt1: ${await this.geoCashingCandidatesAt(1)}`)
         console.log(`allowance from contract to router: ${await this.allowance(BlockchainHelper.FC, BlockchainHelper.ROUTER)}`)
 
         console.log("\n\n*************************** Pricing Data ***************************")
-        console.log(`buyPrice: ${await this.buyPrice(BigInt(9))}`)
+        console.log(`buyPrice: ${await this.buyPrice(this.bcHelper.convertToWei(9))}`)
         console.log(`sellPrice: ${await this.sellPrice()}`)
     }
 
@@ -256,7 +253,7 @@ const buyPrice = await broker.getBuyPrice(9)
 console.log(buyPrice)
 await broker.getInvestmentBudget()
 // await broker.sendETHWithMessage("0x2D1bEB3e41D90d7F9756e92c3061265206a661A2", "super", 9)
-// await broker.voteFor("investmentBet", BlockchainHelper.UNI, 9999)
+await broker.voteFor("investmentBet", BlockchainHelper.UNI, 9999)
 // await broker.voteFor("publicGoodsFunding", BlockchainHelper.POD, 999)
 // await broker.voteFor("geoCashing", BlockchainHelper.VITALIK, 999, "geil")
 //await broker.sellFreedomCash(999)

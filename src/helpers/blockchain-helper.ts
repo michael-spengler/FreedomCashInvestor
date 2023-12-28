@@ -49,6 +49,10 @@ export class BlockchainHelper {
     public getWallet(): any {
         return this.testWallet
     }
+
+    public convertToWei(amount: number): BigInt {
+        return ethers.parseEther(amount.toString())
+    }
 }
 
 
