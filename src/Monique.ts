@@ -14,8 +14,8 @@ export class Monique extends Investor {
     public static async getInstance(historyLength: number, sleepTime: number, logger: Logger): Promise<Investor> {
         if (Investor.instance == undefined) {
             const bHelper = await BlockchainHelper.getInstance()
-            const broker = new Broker(bHelper)
-            const dHelper = new DecisionHelper(historyLength)
+            const broker = new Broker(bHelper, logger)
+            const dHelper = new DecisionHelper(historyLength, logger)
             Investor.instance = new Monique(sleepTime, bHelper, dHelper, broker, logger)
         }
         return Investor.instance
@@ -53,8 +53,8 @@ export class Monique extends Investor {
     
 }
 
-const monique = await Monique.getInstance(36, 27)
-console.log(await monique.getBuyPrice(999))
+const monique = await Monique.getInstance(36, 27, new Logger())
+
 // const minHistoryLength = 3
 // const bFactor = 6
 // await monique.startTheParty(minHistoryLength, bFactor)

@@ -2,20 +2,23 @@
 // https://github.com/monique-baumann/FreedomCash 
 
 import { IBollingerBands, BollingerBandsService } from "https://deno.land/x/bollinger_bands/mod.ts"
+import { Logger } from 'https://deno.land/x/log/mod.ts'
 
 export class DecisionHelper {
     private priceHistory: number[]
     private relevantHistoryLength: number
-    public constructor(relevantHistoryLength: number) {
+    private logger: Logger
+    public constructor(relevantHistoryLength: number, logger: Logger) {
         this.priceHistory = []
         this.relevantHistoryLength = relevantHistoryLength
+        this.logger = logger
     }
     public addToPriceHistory(price: number): void {
         if (this.priceHistory.length == this.relevantHistoryLength) {
             this.priceHistory.splice(0, 1);
         }
         this.priceHistory.push(price);
-        console.log(`priceHistory: ${this.priceHistory}`)
+        this.logger.info(`priceHistory: ${this.priceHistory}`)
     }
     public initializePriceHistory(): void {
         this.priceHistory = []
@@ -25,15 +28,15 @@ export class DecisionHelper {
     }
     public getInvestmentDecision(minHistoryLength: number, factor: number = 2): string {
         if(this.priceHistory.length < minHistoryLength) { 
-            console.log(`We need to wait ${minHistoryLength - this.priceHistory.length} more intervals before we receive investment decisions.`)
+            this.logger.info(`We need to wait ${minHistoryLength - this.priceHistory.length} more intervals before we receive investment decisions.`)
             return "hold" 
         }
         const currentPrice = this.priceHistory[this.priceHistory.length - 1]
-        console.log(`price: ${currentPrice}`)
+        this.logger.info(`price: ${currentPrice}`)
         const wouldBuyAt = this.getBollingerBands(factor).lower[this.priceHistory.length - 1]
-        console.log(`wouldBuyAt: ${wouldBuyAt}`)
+        this.logger.info(`wouldBuyAt: ${wouldBuyAt}`)
         const wouldSellAt = this.getBollingerBands(factor).upper[this.priceHistory.length - 1]
-        console.log(`wouldSellAt: ${wouldSellAt}`)
+        this.logger.info(`wouldSellAt: ${wouldSellAt}`)
         let investmentDecision
         if (currentPrice <= wouldBuyAt) {
             investmentDecision = "buy"
@@ -42,7 +45,7 @@ export class DecisionHelper {
         } else {
             investmentDecision = "hold"
         }
-        console.log(`ìnvestmentDecision: ${investmentDecision}`)
+        this.logger.info(`ìnvestmentDecision: ${investmentDecision}`)
         return investmentDecision
     }
 }

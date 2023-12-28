@@ -10,3 +10,6 @@ CRITICAL Thu Dec 28 2023 14:20:13 GMT+0100 (Central European Standard Time) exam
 WARNING Thu Dec 28 2023 14:24:41 GMT+0100 (Central European Standard Time) example warning
 ERROR Thu Dec 28 2023 14:24:41 GMT+0100 (Central European Standard Time) example error message
 CRITICAL Thu Dec 28 2023 14:24:41 GMT+0100 (Central European Standard Time) example critical message
+WARNING Thu Dec 28 2023 14:35:56 GMT+0100 (Central European Standard Time) example warning
+ERROR Thu Dec 28 2023 14:35:56 GMT+0100 (Central European Standard Time) example error message
+CRITICAL Thu Dec 28 2023 14:35:56 GMT+0100 (Central European Standard Time) example critical message

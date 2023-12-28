@@ -13,8 +13,8 @@ export class Investor {
     public static async getInstance(historyLength: number, sleepTime: number, logger: Logger): Promise<Investor> {
         if (Investor.instance == undefined) {
             const blockchainHelper = await BlockchainHelper.getInstance()
-            const broker = new Broker(blockchainHelper)
-            const decisionHelper = new DecisionHelper(historyLength)
+            const broker = new Broker(blockchainHelper, logger)
+            const decisionHelper = new DecisionHelper(historyLength, logger)
             Investor.instance = new Investor(sleepTime, blockchainHelper, decisionHelper, broker, logger)
         }
         return Investor.instance
@@ -38,10 +38,10 @@ export class Investor {
     public async startTheParty(minHistoryLength: number, factor: number = 2): Promise<void> {
         if (this.partyIsOn === true) { throw Error("The Party Has Already Been Started") }
         this.partyIsOn = true
-        console.log(`\n\nsleepTime: ${this.sleepTime} \nminHistoryLength: ${minHistoryLength}`)
+        this.logger.info(`\n\nsleepTime: ${this.sleepTime} \nminHistoryLength: ${minHistoryLength}`)
         while (this.freedomCashRocks && !this.roundIsActive) { // protecting against too low sleepTime value
             this.roundIsActive = true
-            console.log("\n\n*************************** Pulses Of Freedom ***************************")
+            this.logger.info("\n\n*************************** Pulses Of Freedom ***************************")
             await this.broker.logFundamentals()
             const price = await this.getBuyPrice()
             this.decisionHelper.addToPriceHistory(price)
