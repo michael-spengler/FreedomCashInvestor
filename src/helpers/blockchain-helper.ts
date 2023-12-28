@@ -54,5 +54,3 @@ export class BlockchainHelper {
     }
 }
 
-
-// this.testWallet = new ethers.Wallet(pkTestWallet, this.provider);

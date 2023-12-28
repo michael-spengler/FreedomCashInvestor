@@ -32,5 +32,5 @@ Deno.test("getInvestmentDecision sell", async () => {
     decisionHelper.addToPriceHistory(3)
     decisionHelper.addToPriceHistory(9)
     const decision = decisionHelper.getInvestmentDecision(minHistoryLength)
-    assertEquals(decision, "sell", "check if it is time to hold")
+    assertEquals(decision, "sell", "check if it is time to sell")
 })

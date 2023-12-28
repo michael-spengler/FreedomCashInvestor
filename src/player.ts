@@ -4,10 +4,15 @@ import { Logger } from 'https://deno.land/x/log@v1.1.1/mod.ts'
 
 export class Player {
     
-    private playingAroundIntervalID
+    private playingAroundIntervalID: number = 0
+    private logger: Logger 
 
+    public constructor(logger: Logger){
+        this.logger = logger
+    }
+    
     public playAround(broker: Broker) {
-        if (this.playingAroundIntervalID !== undefined) {
+        if (this.playingAroundIntervalID !== 0) {
             throw new Error("Already Playing")
         }
         this.playingAroundIntervalID = setInterval(async() => {
@@ -61,29 +66,3 @@ export class Player {
         return options[index] 
     }
 }
-
-const minLevelForConsole = 'DEBUG' 
-const minLevelForFile = 'WARNING' 
-const fileName = "./warnings-errors.txt"
-const pureInfo = true // leaving out e.g. the time info
-export const logger = await Logger.getInstance(minLevelForConsole, minLevelForFile, fileName, pureInfo)
-
-const providerURL = Deno.args[0]
-console.log(providerURL)
-// const bHelper = await BlockchainHelper.getInstance(providerURL)
-// const broker = new Broker(bHelper, logger)
-// const buyPrice = await broker.getBuyPrice(9)
-// console.log(buyPrice)
-// await broker.getInvestmentBudget()
-// await broker.sendETHWithMessage("0x2D1bEB3e41D90d7F9756e92c3061265206a661A2", "super", 9)
-// await broker.voteFor("investmentBet", BlockchainHelper.UNI, 9999)
-// await broker.voteFor("publicGoodsFunding", BlockchainHelper.POD, 999)
-// await broker.voteFor("geoCashing", BlockchainHelper.VITALIK, 999, "geil")
-//await broker.sellFreedomCash(999)
-
-// await broker.takeProfits(BlockchainHelper.UNI, 31, 3000, 0)
-
-// await broker.getAmountOutMinimum(BlockchainHelper.WETH, BlockchainHelper.UNI, 31, 3000, 30)
-// await broker.getAmountOutMinimum(BlockchainHelper.UNI, BlockchainHelper.WETH, 31, 3000, 30)
-// let transaction = await contractWithTestWalletAsSigner.voteForInvestmentIn(UNI, bPrice, aToBeBoughtInWei, { value: bcost })
-// await tx.wait()
