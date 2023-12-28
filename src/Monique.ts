@@ -13,10 +13,9 @@ export class Monique extends Investor {
     public static async getInstance(historyLength: number, sleepTime: number): Promise<Investor> {
         if (Investor.instance == undefined) {
             const bHelper = await BlockchainHelper.getInstance()
-            const fProvider = new FundamentalsProvider(bHelper)
             const broker = new Broker(bHelper)
-            const decisionHelper = new DecisionHelper(historyLength)
-            Investor.instance = new Monique(sleepTime, bHelper, fProvider, decisionHelper, broker)
+            const dHelper = new DecisionHelper(historyLength)
+            Investor.instance = new Monique(sleepTime, bHelper, dHelper, broker)
         }
         return Investor.instance
     }
@@ -25,8 +24,8 @@ export class Monique extends Investor {
 
     private player: TestPlayer
 
-    private constructor(sleepTime: number, bHelper: BlockchainHelper, fProvider: FundamentalsProvider, dHelper: DecisionHelper, broker: Broker) {
-        super(sleepTime, bHelper, fProvider, dHelper, broker)
+    private constructor(sleepTime: number, bHelper: BlockchainHelper, dHelper: DecisionHelper, broker: Broker) {
+        super(sleepTime, bHelper, dHelper, broker)
         this.broker = broker
     }
 

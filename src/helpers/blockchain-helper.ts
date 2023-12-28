@@ -13,7 +13,7 @@ export class BlockchainHelper {
     public static readonly UNI = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984"
     public static readonly VITALIK = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
 
-    public static instance 
+    public static instance: BlockchainHelper
 
     public static async getInstance(): Promise<BlockchainHelper> {
         if (BlockchainHelper.instance == undefined){
