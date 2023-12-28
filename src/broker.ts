@@ -129,7 +129,8 @@ export class Broker {
         return this.contract.wethAddress()
     }
     public async amountOfETHInSmartContract(): Promise<any> {
-        return ethers.formatEther(this.provider.getBalance(BlockchainHelper.FC).toString())
+        // return ethers.formatEther(this.provider.getBalance(BlockchainHelper.FC).toString())
+        return this.provider.getBalance(BlockchainHelper.FC)
     }
     public async balanceOf(): Promise<any> {
         return this.contract.balanceOf(BlockchainHelper.FC)
@@ -170,23 +171,14 @@ export class Broker {
     public async iCCounter(): Promise<any> {
         return this.contract.iCCounter()
     }
-    public async geoCashingCandidatesAt0(): Promise<any> {
-        return this.contract.geocashingCandidates(0)
+    public async geoCashingCandidatesAt(index: number): Promise<any> {
+        return this.contract.geocashingCandidates(index)
     }
-    public async geoCashingCandidatesAt1(): Promise<any> {
-        return this.contract.geocashingCandidates(1)
+    public async investmentCandidatesAt(index: number): Promise<any> {
+        return this.contract.investmentCandidates(index)
     }
-    public async investmentCandidatesAt0(): Promise<any> {
-        return this.contract.investmentCandidates(0)
-    }
-    public async investmentCandidatesAt1(): Promise<any> {
-        return this.contract.investmentCandidates(1)
-    }
-    public async publicGoodCandidatesAt0(): Promise<any> {
-        return this.contract.publicGoodCandidates(0)
-    }
-    public async publicGoodCandidatesAt1(): Promise<any> {
-        return this.contract.publicGoodCandidates(1)
+    public async publicGoodCandidatesAt(index: number): Promise<any> {
+        return this.contract.publicGoodCandidates(index)
     }
     public async iCIDAt(address: string): Promise<any> {
         return this.contract.iCIDs(address)
@@ -200,8 +192,8 @@ export class Broker {
     public async allowance(owner: string, spender: string): Promise<any> {
         return this.contract.allowance(owner, spender)
     }
-    public async buyPrice(amountToBeBought: BigInt): Promise<any> {
-        return this.contract.getBuyPrice(amountToBeBought) // wei
+    public async buyPrice(amountToBeBought: number): Promise<any> {
+        return this.contract.getBuyPrice(ethers.parseEther(amountToBeBought.toString()))
     }
     public async sellPrice(): Promise<any> {
         return this.contract.getSellPrice()
@@ -212,48 +204,48 @@ export class Broker {
 
     public async logFundamentals(): Promise<void> {
 
-        console.log("\n\n*************************** Master Data ***************************")
-        console.log(`smartContractAddress: ${BlockchainHelper.FC}`)
-        console.log(`totalSupply: ${this.totalSupply()}`)
-        console.log(`symbol: ${this.symbol()}`)
-        console.log(`decimals: ${this.decimals()}`)
-        console.log(`routerAddress: ${this.routerAddress()}`)
-        console.log(`factoryAddress: ${this.factoryAddress()}`)
-        console.log(`wethAddress: ${this.wethAddress()}`)
+        // console.log("\n\n*************************** Master Data ***************************")
+        // console.log(`smartContractAddress: ${BlockchainHelper.FC}`)
+        // console.log(`totalSupply: ${await this.totalSupply()}`)
+        // console.log(`symbol: ${await this.symbol()}`)
+        // console.log(`decimals: ${await this.decimals()}`)
+        // console.log(`routerAddress: ${await this.routerAddress()}`)
+        // console.log(`factoryAddress: ${await this.factoryAddress()}`)
+        // console.log(`wethAddress: ${await this.wethAddress()}`)
 
-        console.log("\n\n*************************** Budget Data ***************************")
-        console.log(`amountOfETHInSmartContract: ${this.amountOfETHInSmartContract()}`)
-        console.log(`balanceOf Smart Contract: ${this.balanceOf()}`)
-        console.log(`investmentBudget: ${this.investmentBudget()}`)
-        console.log(`publicGoodsFundingBudget: ${this.publicGoodsFundingBudget()}`)
-        console.log(`geoCashingBudget: ${this.geoCashingBudget()}`)
+        // console.log("\n\n*************************** Budget Data ***************************")
+        // console.log(`amountOfETHInSmartContract: ${await this.amountOfETHInSmartContract()}`)
+        // console.log(`balanceOf Smart Contract: ${await this.balanceOf()}`)
+        // console.log(`investmentBudget: ${await this.investmentBudget()}`)
+        // console.log(`publicGoodsFundingBudget: ${await this.publicGoodsFundingBudget()}`)
+        // console.log(`geoCashingBudget: ${await this.geoCashingBudget()}`)
 
-        console.log("\n\n*************************** Gaming Data ***************************")
-        console.log(`addressOfHighestSoFarInvestment: ${this.addressOfHighestSoFarInvestment()}`)
-        console.log(`addressOfHighestSoFarPublicGood: ${this.addressOfHighestSoFarPublicGood()}`)
-        console.log(`addressOfHighestSoFarGeoCash: ${this.addressOfHighestSoFarGeoCash()}`)
+        // console.log("\n\n*************************** Gaming Data ***************************")
+        // console.log(`addressOfHighestSoFarInvestment: ${await this.addressOfHighestSoFarInvestment()}`)
+        // console.log(`addressOfHighestSoFarPublicGood: ${await this.addressOfHighestSoFarPublicGood()}`)
+        // console.log(`addressOfHighestSoFarGeoCash: ${await this.addressOfHighestSoFarGeoCash()}`)
 
-        console.log("\n\n*************************** Operational Data ***************************")
-        console.log(`iCCounter: ${this.iCCounter()}`)
-        console.log(`pGCCounter: ${this.pGCCounter()}`)
-        console.log(`gCCCounter: ${this.gCCCounter()}`)
-        console.log(`iCIDsAtCULT: ${this.iCIDAt("asdf")}`)
-        console.log(`pGCIDsAtOPDonations: ${this.pGCIDAt("asdf")}`)
-        console.log(`gCCIDsAtVitalik: ${this.gCCIDAt("asdf")}`)
-        console.log(`poolAddress: ${this.getPoolAddress(BlockchainHelper.WETH, BlockchainHelper.UNI, 3000)}`)
-        console.log(`investmentPriceForAsset: ${this.investmentPriceForAsset("asdf", await this.getPoolAddress(BlockchainHelper.WETH, BlockchainHelper.UNI, 3000))}`)
-        console.log(`amountOutMinimum: ${this.amountOutMinimum(BlockchainHelper.WETH, BlockchainHelper.UNI, BigInt(9), 3000, 30)}`)
-        console.log(`investmentCandidatesAt0: ${this.investmentCandidatesAt0()}`)
-        console.log(`investmentCandidatesAt1: ${this.investmentCandidatesAt1()}`)
-        console.log(`publicGoodCandidatesAt0: ${this.publicGoodCandidatesAt0()}`)
-        console.log(`publicGoodCandidatesAt1: ${this.publicGoodCandidatesAt1()}`)
-        console.log(`geoCashingCandidatesAt0: ${this.geoCashingCandidatesAt0()}`)
-        console.log(`geoCashingCandidatesAt1: ${this.geoCashingCandidatesAt1()}`)
-        console.log(`allowance from contract to router: ${this.allowance(BlockchainHelper.FC, BlockchainHelper.routerAddress)}`)
+        // console.log("\n\n*************************** Operational Data ***************************")
+        // console.log(`iCCounter: ${await this.iCCounter()}`)
+        // console.log(`pGCCounter: ${await this.pGCCounter()}`)
+        // console.log(`gCCCounter: ${await this.gCCCounter()}`)
+        // console.log(`iCIDsAtFC: ${await this.iCIDAt(BlockchainHelper.FC)}`)
+        // console.log(`pGCIDsAtOPDonations: ${await this.pGCIDAt(BlockchainHelper.FC)}`)
+        // console.log(`gCCIDsAtVitalik: ${await this.gCCIDAt(BlockchainHelper.FC)}`)
+        // console.log(`poolAddress: ${await this.getPoolAddress(BlockchainHelper.WETH, BlockchainHelper.UNI, 3000)}`)
+        // console.log(`investmentPriceForAsset: ${await this.investmentPriceForAsset(BlockchainHelper.CULT, await this.getPoolAddress(BlockchainHelper.WETH, BlockchainHelper.UNI, 3000))}`)
+        // console.log(`amountOutMinimum: ${await this.amountOutMinimum(BlockchainHelper.WETH, BlockchainHelper.UNI, BigInt(9), 3000, 30)}`)
+        // console.log(`investmentCandidatesAt0: ${await this.investmentCandidatesAt(0)}`)
+        // console.log(`investmentCandidatesAt1: ${await this.investmentCandidatesAt(1)}`)
+        // console.log(`publicGoodCandidatesAt0: ${await this.publicGoodCandidatesAt(0)}`)
+        // console.log(`publicGoodCandidatesAt1: ${await this.publicGoodCandidatesAt(1)}`)
+        // console.log(`geoCashingCandidatesAt0: ${await this.geoCashingCandidatesAt(0)}`)
+        // console.log(`geoCashingCandidatesAt1: ${await this.geoCashingCandidatesAt(1)}`)
+        console.log(`allowance from contract to router: ${await this.allowance(BlockchainHelper.FC, BlockchainHelper.ROUTER)}`)
 
         console.log("\n\n*************************** Pricing Data ***************************")
-        console.log(`buyPrice: ${this.buyPrice(BigInt(9))}`)
-        console.log(`sellPrice: ${this.sellPrice()}`)
+        console.log(`buyPrice: ${await this.buyPrice(BigInt(9))}`)
+        console.log(`sellPrice: ${await this.sellPrice()}`)
     }
 
 }

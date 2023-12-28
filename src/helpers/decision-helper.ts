@@ -25,7 +25,7 @@ export class DecisionHelper {
     }
     public getInvestmentDecision(minHistoryLength: number, factor: number = 2): string {
         if(this.priceHistory.length < minHistoryLength) { 
-            console.log(`We need to wait ${this.priceHistory.length - minHistoryLength} more intervals before we receive investment decisions.`)
+            console.log(`We need to wait ${minHistoryLength - this.priceHistory.length} more intervals before we receive investment decisions.`)
             return "hold" 
         }
         const currentPrice = this.priceHistory[this.priceHistory.length - 1]

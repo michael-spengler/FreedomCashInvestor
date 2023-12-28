@@ -3,6 +3,7 @@ import { pkTestWallet, providerURL } from "../../.env.ts"
 
 export class BlockchainHelper {
 
+    public static readonly ROUTER = "0xE592427A0AEce92De3Edee1F18E0157C05861564"
     public static readonly CULT = "0xf0f9D895aCa5c8678f706FB8216fa22957685A13"
     public static readonly POD = "0xE90CE7764d8401d19ed3733a211bd3b06c631Bc0"
     public static readonly SHIB = "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE"
