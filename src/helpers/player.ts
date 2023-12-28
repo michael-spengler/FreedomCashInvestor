@@ -14,16 +14,13 @@ export class Player {
             switch (randomOption) {
     
                 case "voteForGeoCash": {
-                    await broker.voteFor("geoCashing", BlockchainHelper.VITALIK, 999, "geil")
-                    return
+                    return broker.voteFor("geoCashing", BlockchainHelper.VITALIK, 999, "geil")
                 }
                 case "voteForInvestment": {
-                    await broker.voteFor("investmentBet", BlockchainHelper.UNI, 9999)
-                    return
+                    return broker.voteFor("investmentBet", BlockchainHelper.UNI, 9999)
                 }
                 case "voteForPublicGood": {
-                    await broker.voteFor("publicGoodsFunding", BlockchainHelper.POD, 999)
-                    return
+                    return broker.voteFor("publicGoodsFunding", BlockchainHelper.POD, 999)
                 }
                 case "sendETHWithMessage": {
                     console.log("sending ETH with Message")
@@ -38,14 +35,10 @@ export class Player {
                     return
                 }
                 case "executeCommunityInvestment": {
-                    await broker.executeCommunityInvestment(BlockchainHelper.UNI, 3000, 30)
-
-
-                    return
+                    return broker.executeCommunityInvestment(BlockchainHelper.UNI, 3000, 30)
                 }
                 case "sellFreedomCash": {
-                    console.log("sell Freedom Cash")
-                    return
+                    return broker.sellFreedomCash(999)
                 }
                 default: throw new Error("unknown option")
             }
