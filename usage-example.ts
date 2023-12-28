@@ -1,18 +1,19 @@
 // I buy and sell https://FreedomCash.org 
-// import { Investor } from "./src/investor.ts"
-import { Investor } from "https://deno.land/x/freedom_cash_investor/mod.ts"
-import { Logger } from 'https://deno.land/x/log@v1.1.1/mod.ts'
+import { Investor } from "./src/investor.ts"
+// import { Investor } from "https://deno.land/x/freedom_cash_investor/mod.ts"
+import { Logger } from 'https://deno.land/x/log/mod.ts'
 
 
-export const logger = getLogger()
+export const logger = await getLogger()
 
-let providerURL = getProviderURL()
+let providerURL = getProviderURL(logger)
+
 
 const minHistoryLength = 3
 const bFactor = 6
 const sleepTimeInSeconds = 27
 const relevantHistoryLength = 45
-const investor: Investor = await Investor.getInstance(relevantHistoryLength, sleepTimeInSeconds, logger)
+const investor: Investor = await Investor.getInstance(relevantHistoryLength, sleepTimeInSeconds, logger, providerURL)
 await investor.startTheParty(minHistoryLength, bFactor)
 
 
@@ -36,25 +37,26 @@ await investor.startTheParty(minHistoryLength, bFactor)
 
 // this.testWallet = new ethers.Wallet(pkTestWallet, this.provider);
 
-function getLogger(): Logger {
+async function getLogger(): Promise<Logger> {
     const minLevelForConsole = 'DEBUG'
     const minLevelForFile = 'WARNING'
     const fileName = "./warnings-errors.txt"
     const pureInfo = true // leaving out e.g. the time info
     return Logger.getInstance(minLevelForConsole, minLevelForFile, fileName, pureInfo)
+
 }
 
-function getProviderURL(): string {
+function getProviderURL(logger: Logger): string|void {
+    let configuration: any = {}
     if (Deno.args[0] !== undefined) { // supplying your provider URL via parameter
-        providerURL = Deno.args[0]
+        return Deno.args[0]
     } else { // ... or via .env.json
         try {
             configuration = JSON.parse(Deno.readTextFileSync('./.env.json'))
-            providerURL = configuration.providerURL
+            return configuration.providerURL
         } catch (error) {
             logger.error(error.message)
             logger.error("without a providerURL I cannot connect to the blockchain")
         }
     }
-    return providerURL
 }
