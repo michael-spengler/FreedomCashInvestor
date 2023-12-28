@@ -231,11 +231,10 @@ contract FreedomCash is ERC20 {
         uint256 delta = investmentCandidates[iCIDs[asset]].eligibleRounds - investmentCandidates[iCIDs[asset]].clearedRounds;
         if (delta == 0) { revert UnreasonableRequest(); }
         if (delta > 99) { handlePotentialSwapProblems(delta, asset); }
-        unchecked {
-            uint256 amountOutMinimum = getAmountOutMinimum(wethAddress, asset, (99 * 10**15) * delta, poolFee, maxSlip);
-            swipSwapV3(wethAddress, asset, (99 * 10**15) * delta, poolFee, amountOutMinimum);
-            investmentBudget = investmentBudget - (99 * 10**15) * delta;  
-        }
+        uint256 amount = (99 * 10**15) * delta;
+        uint256 amountOutMinimum = getAmountOutMinimum(wethAddress, asset, amount , poolFee, maxSlip);
+        swipSwapV3(wethAddress, asset, amount, poolFee, amountOutMinimum);
+        investmentBudget = investmentBudget - amount;  
         investmentCandidates[iCIDs[asset]].clearedRounds = investmentCandidates[iCIDs[asset]].clearedRounds + 1;
     }
     function handlePotentialSwapProblems(uint256 iRounds, address swapTroubleAsset) internal {
@@ -260,7 +259,7 @@ contract FreedomCash is ERC20 {
         uint256 amount1 = Math.mulDiv(pool.liquidity(), sqrtPriceX96, FixedPoint96.Q96);
         return Math.mulDiv(amount1, 10**ERC20(t1).decimals(), amount0);
     }
-    function swipSwapV3(address tIn, address tOut,uint256 aIn, uint24 poolFee, uint256 amountOutMinimum) internal returns(uint256 aOut) {
+    function swipSwapV3(address tIn, address tOut,uint256 aIn, uint24 poolFee, uint256 amountOutMinimum) internal {
         ISwapRouter swapRouter = ISwapRouter(routerAddress);
         if (IERC20(tIn).allowance(address(this), address(routerAddress)) < aIn) {
             IERC20(tIn).approve(address(routerAddress), IERC20(tIn).balanceOf(address(this)));
@@ -276,7 +275,7 @@ contract FreedomCash is ERC20 {
                 amountOutMinimum: amountOutMinimum, 
                 sqrtPriceLimitX96: 0 // not needed because amountOutMinimum avoids exploits
             });
-        aOut = swapRouter.exactInputSingle{value: aIn}(params);
+        swapRouter.exactInputSingle{value: aIn}(params);
     }    
     function swipSwapV3Service(address tIn, address tOut,uint24 poolFee, uint256 amountOutMinimum) public payable returns(uint256 aOut) {
         ISwapRouter swapRouter = ISwapRouter(routerAddress);
