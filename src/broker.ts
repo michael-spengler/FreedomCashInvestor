@@ -38,8 +38,12 @@ export class Broker {
     }
     public async sellFreedomCash(amount: number): Promise<void> {
         console.log("selling Freedom Cash")
+        let balance = await this.contract.balanceOf(BlockchainHelper.FC)
+        console.log(`sc balance before: ${balance}`)
         const sellPrice = await this.contract.getSellPrice()
-        await this.contract.sellFreedomCash(ethers.parseEther(amount.toString()), sellPrice)  
+        await this.contract.sellFreedomCash((this.getAmountInWei(amount)), sellPrice)  
+        balance = await this.contract.balanceOf(BlockchainHelper.FC)
+        console.log(`sc balance after : ${balance}`)
     }
     public async executeCommunityInvestment(asset: string, poolFee: number, maxSlip: number) {
         console.log("executing community investment")
@@ -101,10 +105,11 @@ const broker = new Broker(bHelper)
 const buyPrice = await broker.getBuyPrice(9)
 console.log(buyPrice)
 // await broker.sendETHWithMessage("0x2D1bEB3e41D90d7F9756e92c3061265206a661A2", "super", 9)
-await broker.voteFor("investmentBet", BlockchainHelper.UNI, 9999)
-await broker.voteFor("publicGoodsFunding", BlockchainHelper.POD, 999)
-await broker.voteFor("geoCashing", BlockchainHelper.VITALIK, 999, "geil")
-await broker.executeCommunityInvestment(BlockchainHelper.UNI, 3000, 30)
+// await broker.voteFor("investmentBet", BlockchainHelper.UNI, 9999)
+// await broker.voteFor("publicGoodsFunding", BlockchainHelper.POD, 999)
+// await broker.voteFor("geoCashing", BlockchainHelper.VITALIK, 999, "geil")
+await broker.sellFreedomCash(999)
+
 // await broker.takeProfits(BlockchainHelper.UNI, 1000, 3000, 70)
 // let transaction = await contractWithTestWalletAsSigner.voteForInvestmentIn(UNI, bPrice, aToBeBoughtInWei, { value: bcost })
     // await tx.wait()

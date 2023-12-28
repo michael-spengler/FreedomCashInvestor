@@ -1,4 +1,5 @@
 import { Broker } from "../broker.ts"
+import { BlockchainHelper } from "./blockchain-helper.ts"
 
 export class Player {
     
@@ -13,16 +14,15 @@ export class Player {
             switch (randomOption) {
     
                 case "voteForGeoCash": {
-                    console.log("voting for GeoCash")
+                    await broker.voteFor("geoCashing", BlockchainHelper.VITALIK, 999, "geil")
                     return
                 }
                 case "voteForInvestment": {
-                    console.log("voting for Investment")
-                    await broker.voteForInvestment(9)
+                    await broker.voteFor("investmentBet", BlockchainHelper.UNI, 9999)
                     return
                 }
                 case "voteForPublicGood": {
-                    console.log("voting for Public Good")
+                    await broker.voteFor("publicGoodsFunding", BlockchainHelper.POD, 999)
                     return
                 }
                 case "sendETHWithMessage": {
@@ -38,7 +38,9 @@ export class Player {
                     return
                 }
                 case "executeCommunityInvestment": {
-                    console.log("executing community investment")
+                    await broker.executeCommunityInvestment(BlockchainHelper.UNI, 3000, 30)
+
+
                     return
                 }
                 case "sellFreedomCash": {
