@@ -5,13 +5,15 @@ import { Logger } from 'https://deno.land/x/log@v1.1.1/mod.ts'
 export class Player {
     
     private playingAroundIntervalID: number = 0
+    private broker: Broker 
     private logger: Logger 
 
-    public constructor(logger: Logger){
+    public constructor(broker: Broker, logger: Logger){
         this.logger = logger
+        this.broker = broker
     }
-    
-    public playAround(broker: Broker) {
+
+    public playAround() {
         if (this.playingAroundIntervalID !== 0) {
             throw new Error("Already Playing")
         }
@@ -20,13 +22,13 @@ export class Player {
             switch (randomOption) {
     
                 case "voteForGeoCash": {
-                    return broker.voteFor("geoCashing", BlockchainHelper.VITALIK, 999, "geil")
+                    return this.broker.voteFor("geoCashing", BlockchainHelper.VITALIK, 999, "geil")
                 }
                 case "voteForInvestment": {
-                    return broker.voteFor("investmentBet", BlockchainHelper.UNI, 9999)
+                    return this.broker.voteFor("investmentBet", BlockchainHelper.UNI, 9999)
                 }
                 case "voteForPublicGood": {
-                    return broker.voteFor("publicGoodsFunding", BlockchainHelper.POD, 999)
+                    return this.broker.voteFor("publicGoodsFunding", BlockchainHelper.POD, 999)
                 }
                 case "sendETHWithMessage": {
                     console.log("sending ETH with Message")
@@ -41,10 +43,10 @@ export class Player {
                     return
                 }
                 case "executeCommunityInvestment": {
-                    return broker.executeCommunityInvestment(BlockchainHelper.UNI, 3000, 30)
+                    return this.broker.executeCommunityInvestment(BlockchainHelper.UNI, 3000, 30)
                 }
                 case "sellFreedomCash": {
-                    return broker.sellFreedomCash(999)
+                    return this.broker.sellFreedomCash(999)
                 }
                 default: throw new Error("unknown option")
             }
