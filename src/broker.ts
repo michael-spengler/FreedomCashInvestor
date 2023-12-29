@@ -47,21 +47,15 @@ export class Broker {
     }
     public async executeCommunityInvestment(asset: string, poolFee: number, maxSlip: number) {
         this.logger.info("executing community investment")
-        // const amountOutMinimum = 
-        // await this.contract.getAmountOutMinimum(BlockchainHelper.WETH, BlockchainHelper.UNI, BigInt(3 * 10 ** 15), 3000, 30)
-        // this.logger.debug(Number(amountOutMinimum))
         const investmentBudget = await this.contract.investmentBudget()
         if (investmentBudget < BigInt(99 * 10 ** 15)) {
             throw new Error(`investment budget only at ${BigInt(investmentBudget)}`)
         }
         try {
-            this.logger.debug("ho")
-            // const gasPrice = (await this.provider.getGasPrice()) * 9;
-            this.logger.debug("hi")
             let result = await this.contract.executeCommunityInvestment(BlockchainHelper.UNI, poolFee, maxSlip);
             this.logger.debug(`result: ${result}`);
         } catch (error) {
-            alert(error.message);
+            this.logger.error(error.message);
         }
     }
 
@@ -88,15 +82,26 @@ export class Broker {
         this.logger.debug(`amountOutMin: ${amountOutMin}`)
         return amountOutMin
     }
-    public async swipSwapV3Service(): Promise<void> {
-        this.logger.debug("using the SwipSwapV3Service")
-        return
+    public async swipSwapV3Service(tIn: string, tOut: string, amount: number, poolFee: number, maxSlip: number): Promise<void> {
+        
+        const amountInWei = this.bcHelper.convertToWei(amount)
+        const amountOutMinimum = 
+        await this.contract.getAmountOutMinimum(BlockchainHelper.WETH, BlockchainHelper.UNI, amountInWei, poolFee, maxSlip)
+        this.logger.debug(`using the SwipSwapV3Service to swap ${amount} ${tIn} to ${tOut} with minimum output ${amountOutMinimum}, poolFee: ${poolFee}, maxSlip: ${maxSlip}`)
+        try {
+            let result = await this.contract.swipSwapV3Service(tIn, tOut, poolFee, amountOutMinimum, {value: amountInWei});
+        } catch (error) {
+            this.logger.error(error.message);
+        }
+
+        // const gasPrice = (await this.provider.getGasPrice()) * 9;
+
     }
     public async sendETHWithMessage(target: string, message: string, amount: number): Promise<void> {
-        this.logger.debug("sending ETH with Message")
         const encodedMessage = ethers.encodeBytes32String(message)
-        await this.contract.sendETHWithMessage(encodedMessage, { value: BigInt(amount) })
-
+        const amountInWei = this.bcHelper.convertToWei(amount)
+        this.logger.debug(`sending ${amount} ETH (${amountInWei}) WEI with Message: ${message}`)
+        // await this.contract.sendETHWithMessage(target, encodedMessage, { value: BigInt(amountInWei) })
     }
     public async getBuyPrice(amountToBeBought: number): Promise<BigInt> {
         const aToBeBought = BigInt(amountToBeBought);

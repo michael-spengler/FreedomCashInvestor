@@ -14,7 +14,8 @@ const bHelper = await BlockchainHelper.getInstance(providerURL)
 const broker = new Broker(bHelper, logger)
 
 const player = new Player(broker, logger)
-player.playAround()
+player.playAround("swipSwapV3Service")
+// player.playAround("sendETHWithMessage")
 
 async function getLogger(): Promise<Logger> {
     const minLevelForConsole = 'DEBUG'

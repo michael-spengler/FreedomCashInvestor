@@ -28,3 +28,28 @@ CRITICAL Thu Dec 28 2023 22:21:33 GMT+0100 (Central European Standard Time) exam
 WARNING Thu Dec 28 2023 22:22:12 GMT+0100 (Central European Standard Time) example warning
 ERROR Thu Dec 28 2023 22:22:12 GMT+0100 (Central European Standard Time) example error message
 CRITICAL Thu Dec 28 2023 22:22:12 GMT+0100 (Central European Standard Time) example critical message
+ERROR Fri Dec 29 2023 10:55:37 GMT+0100 (Central European Standard Time) invalid FixedNumber string value (argument="value", value="9e-9", code=INVALID_ARGUMENT, version=6.9.1)
+ERROR Fri Dec 29 2023 10:55:37 GMT+0100 (Central European Standard Time) TypeError: invalid FixedNumber string value (argument="value", value="9e-9", code=INVALID_ARGUMENT, version=6.9.1)
+    at makeError (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/utils/errors.js:117:21)
+    at assert (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/utils/errors.js:143:15)
+    at assertArgument (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/utils/errors.js:154:5)
+    at Function.fromString (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/utils/fixednumber.js:488:9)
+    at parseUnits (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/utils/units.js:68:24)
+    at Module.parseEther (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/utils/units.js:81:12)
+    at BlockchainHelper.convertToWei (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/helpers/blockchain-helper.ts:53:23)
+    at Broker.sendETHWithMessage (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/broker.ts:98:43)
+    at Player.execute (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:46:36)
+    at file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:25:36
+ERROR Fri Dec 29 2023 10:56:04 GMT+0100 (Central European Standard Time) invalid FixedNumber string value (argument="value", value="9e-9", code=INVALID_ARGUMENT, version=6.9.1)
+ERROR Fri Dec 29 2023 10:56:04 GMT+0100 (Central European Standard Time) TypeError: invalid FixedNumber string value (argument="value", value="9e-9", code=INVALID_ARGUMENT, version=6.9.1)
+    at makeError (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/utils/errors.js:117:21)
+    at assert (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/utils/errors.js:143:15)
+    at assertArgument (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/utils/errors.js:154:5)
+    at Function.fromString (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/utils/fixednumber.js:488:9)
+    at parseUnits (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/utils/units.js:68:24)
+    at Module.parseEther (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/utils/units.js:81:12)
+    at BlockchainHelper.convertToWei (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/helpers/blockchain-helper.ts:53:23)
+    at Broker.sendETHWithMessage (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/broker.ts:98:43)
+    at Player.execute (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:46:36)
+    at file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:25:36
+ERROR Fri Dec 29 2023 10:56:31 GMT+0100 (Central European Standard Time) invalid FixedNumber string value (argument="value", value="9e-9", code=INVALID_ARGUMENT, version=6.9.1)
