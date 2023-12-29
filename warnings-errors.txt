@@ -53,3 +53,10 @@ ERROR Fri Dec 29 2023 10:56:04 GMT+0100 (Central European Standard Time) TypeErr
     at Player.execute (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:46:36)
     at file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:25:36
 ERROR Fri Dec 29 2023 10:56:31 GMT+0100 (Central European Standard Time) invalid FixedNumber string value (argument="value", value="9e-9", code=INVALID_ARGUMENT, version=6.9.1)
+WARNING Fri Dec 29 2023 14:11:02 GMT+0100 (Central European Standard Time) hmm
+WARNING Fri Dec 29 2023 14:14:58 GMT+0100 (Central European Standard Time) hmm
+WARNING Fri Dec 29 2023 14:14:58 GMT+0100 (Central European Standard Time) hmm
+WARNING Fri Dec 29 2023 14:17:39 GMT+0100 (Central European Standard Time) hmm
+WARNING Fri Dec 29 2023 14:17:39 GMT+0100 (Central European Standard Time) hmm
+WARNING Fri Dec 29 2023 14:17:41 GMT+0100 (Central European Standard Time) hmm
+WARNING Fri Dec 29 2023 14:17:41 GMT+0100 (Central European Standard Time) hmm

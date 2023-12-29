@@ -4,7 +4,7 @@
 import { IBollingerBands, BollingerBandsService } from "https://deno.land/x/bollinger_bands@v0.3.0/mod.ts"
 import { Logger } from 'https://deno.land/x/log@v1.1.1/mod.ts'
 
-export class DecisionHelper {
+export class Bollinger {
     private priceHistory: number[]
     private relevantHistoryLength: number
     private logger: Logger
@@ -14,6 +14,7 @@ export class DecisionHelper {
         this.logger = logger
     }
     public addToPriceHistory(price: number): void {
+        this.logger.info(`adding ${price} to price history`)
         if (this.priceHistory.length == this.relevantHistoryLength) {
             this.priceHistory.splice(0, 1);
         }

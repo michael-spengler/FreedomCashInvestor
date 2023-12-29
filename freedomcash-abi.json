@@ -442,7 +442,7 @@
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "t1",
+				"name": "asset",
 				"type": "address"
 			},
 			{
@@ -780,13 +780,7 @@
 			}
 		],
 		"name": "swipSwapV3Service",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "aOut",
-				"type": "uint256"
-			}
-		],
+		"outputs": [],
 		"stateMutability": "payable",
 		"type": "function"
 	},
