@@ -88,7 +88,7 @@ export class Broker {
     }
     public async swipSwapV3Service(tIn: string, tOut: string, amount: number, poolFee: number, maxSlip: number): Promise<void> {
 
-        const amountInWei = this.bcHelper.convertToWei(amount)
+        const amountInWei = Helper.convertToWei(amount)
         const amountOutMinimum =
             await this.contract.getAmountOutMinimum(Helper.WETH, Helper.UNI, amountInWei, poolFee, maxSlip)
         this.logger.debug(`using the SwipSwapV3Service to swap ${amount} ${tIn} to ${tOut} with minimum output ${amountOutMinimum}, poolFee: ${poolFee}, maxSlip: ${maxSlip}`)
