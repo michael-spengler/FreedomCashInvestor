@@ -1,7 +1,6 @@
-import { ethers } from 'npm:ethers@6.9.1';
-import { Logger } from 'https://deno.land/x/log@v1.1.1/mod.ts'
+import { ethers, Logger } from '../deps.ts';
 
-export class BlockchainHelper {
+export class Helper {
 
     public static readonly ROUTER = "0xE592427A0AEce92De3Edee1F18E0157C05861564"
     public static readonly CULT = "0xf0f9D895aCa5c8678f706FB8216fa22957685A13"
@@ -13,14 +12,14 @@ export class BlockchainHelper {
     public static readonly UNI = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984"
     public static readonly VITALIK = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
 
-    public static instance: BlockchainHelper
+    public static instance: Helper
 
-    public static async getInstance(providerURL: string): Promise<BlockchainHelper> {
-        if (BlockchainHelper.instance == undefined) {
-            BlockchainHelper.instance = new BlockchainHelper(providerURL)
-            await BlockchainHelper.instance.initializeContract()
+    public static async getInstance(providerURL: string): Promise<Helper> {
+        if (Helper.instance == undefined) {
+            Helper.instance = new Helper(providerURL)
+            await Helper.instance.initializeContract()
         }
-        return BlockchainHelper.instance
+        return Helper.instance
     }
 
     public static convertToWei(amount: number): BigInt {
@@ -48,7 +47,7 @@ export class BlockchainHelper {
                 logger.error("without a providerURL I cannot connect to the blockchain")
             }
         }
-    }    
+    }
 
     private provider: any
     private contract: any = undefined
@@ -56,12 +55,12 @@ export class BlockchainHelper {
 
     private constructor(providerURL: string) { // private to ensure singleton pattern and proper initialization
         this.provider = new ethers.JsonRpcProvider(providerURL)
-    } 
+    }
 
-    public async initializeContract(){
-        this.contract = new ethers.Contract(BlockchainHelper.FC, this.getFreedomCashABI(), await this.provider.getSigner())
+    public async initializeContract() {
+        this.contract = new ethers.Contract(Helper.FC, this.getFreedomCashABI(), await this.provider.getSigner())
         // const testWallet = new ethers.Wallet(pkTestWallet, this.provider);
-        // this.contract = new ethers.Contract(BlockchainHelper.FC, this.getFreedomCashABI(), testWallet);
+        // this.contract = new ethers.Contract(Helper.FC, this.getFreedomCashABI(), testWallet);
 
     }
     public getFreedomCashABI(): any {
@@ -75,6 +74,6 @@ export class BlockchainHelper {
     }
     public getWallet(): any {
         return this.testWallet
-    }   
+    }
 }
 

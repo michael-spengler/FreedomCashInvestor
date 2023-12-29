@@ -1,7 +1,6 @@
-import { sleep } from "https://deno.land/x/sleep@v1.3.0/mod.ts"
+import { sleep, Logger } from "../deps.ts"
 import { Broker } from "./broker.ts"
-import { BlockchainHelper } from "./blockchain-helper.ts"
-import { Logger } from 'https://deno.land/x/log@v1.1.1/mod.ts'
+import { Helper } from "./helper.ts"
 import { Bollinger } from "./bollinger.ts"
 
 export enum EMode {
@@ -22,7 +21,7 @@ export enum EActions {
     sellFreedomCash = "Sell Freedom Cash"
 }
 
-export class Player {
+export class MoniqueBaumann {
 
     private readonly freedomCashRocks = true
     private partyIsOn = false
@@ -60,7 +59,7 @@ export class Player {
                 await this.playBollinger(minHistoryLength, spreadFactor, mode)
             }
         } else if (minHistoryLength === 0 && spreadFactor === 0) {
-            if (mode === EMode.actionRandom){
+            if (mode === EMode.actionRandom) {
                 const index = Math.round((Math.random() * ((6 - 1) - 0) + 0))
                 const randomAction = Object.values(EActions)[index]
                 this.logger.info(randomAction)
@@ -76,7 +75,7 @@ export class Player {
         await this.broker.logFundamentals()
         let price: number
         if (mode === EMode.bollingerReal) {
-            price = await this.broker.getBuyPrice(BlockchainHelper.convertToWei(1))
+            price = await this.broker.getBuyPrice(Helper.convertToWei(1))
         } else {
             price = Math.round((Math.random() * (81 - 9) + 9))
         }
@@ -96,30 +95,30 @@ export class Player {
     private async execute(action: EActions): Promise<void> {
         switch (action) {
             case EActions.voteForGeoCash: {
-                return this.broker.voteFor("geoCashing", BlockchainHelper.VITALIK, 999, "geil")
+                return this.broker.voteFor("geoCashing", Helper.VITALIK, 999, "geil")
             }
             case EActions.voteForInvestment: {
-                return this.broker.voteFor("investmentBet", BlockchainHelper.UNI, 9999)
+                return this.broker.voteFor("investmentBet", Helper.UNI, 9999)
             }
             case EActions.voteForPublicGood: {
-                return this.broker.voteFor("publicGoodsFunding", BlockchainHelper.POD, 999)
+                return this.broker.voteFor("publicGoodsFunding", Helper.POD, 999)
             }
             case EActions.sendETHWithMessage: {
-                return this.broker.sendETHWithMessage(BlockchainHelper.VITALIK, "Hello Free World", 0.000009)
+                return this.broker.sendETHWithMessage(Helper.VITALIK, "Hello Free World", 0.000009)
             }
             case EActions.swipSwapV3Service: {
-                return this.broker.swipSwapV3Service(BlockchainHelper.WETH, BlockchainHelper.UNI, 0.009, 3000, 30)
+                return this.broker.swipSwapV3Service(Helper.WETH, Helper.UNI, 0.009, 3000, 30)
             }
             case EActions.takeProfits: {
-                return this.broker.takeProfits(BlockchainHelper.UNI, 1, 3000, 70)
+                return this.broker.takeProfits(Helper.UNI, 1, 3000, 70)
             }
             case EActions.executeCommunityInvestment: {
-                return this.broker.executeCommunityInvestment(BlockchainHelper.UNI, 3000, 30)
+                return this.broker.executeCommunityInvestment(Helper.UNI, 3000, 30)
             }
             case EActions.sellFreedomCash: {
                 return this.broker.sellFreedomCash(999)
             }
-            default: throw new Error(`unknown action: ${action} (typeOfAction ${typeof(action)})`)
+            default: throw new Error(`unknown action: ${action} (typeOfAction ${typeof (action)})`)
         }
     }
     // private getRandomAction(): EActions {
