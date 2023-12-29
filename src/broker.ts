@@ -104,7 +104,7 @@ export class Broker {
     }
     public async sendETHWithMessage(target: string, message: string, amount: number): Promise<void> {
         const encodedMessage = ethers.encodeBytes32String(message)
-        const amountInWei = this.bcHelper.convertToWei(amount)
+        const amountInWei = BlockchainHelper.convertToWei(amount)
         this.logger.debug(`sending ${amount} ETH (${amountInWei}) WEI with Message: ${message}`)
         // await this.contract.sendETHWithMessage(target, encodedMessage, { value: BigInt(amountInWei) })
     }

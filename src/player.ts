@@ -5,10 +5,23 @@ import { Logger } from 'https://deno.land/x/log@v1.1.1/mod.ts'
 import { Bollinger } from "./bollinger.ts"
 
 export enum EMode {
-    RANDOM,
-    BOLLINGERREAL,
-    BOLLINGERDEMO
+    actionRandom,
+    actionSpecific,
+    bollingerReal,
+    bollingerDemo
 }
+
+export enum EActions {
+    voteForGeoCash = "Vote for GeoCash",
+    voteForInvestment = "Vote for Investment",
+    voteForPublicGood = "Vote for Public Good",
+    sendETHWithMessage = "Send Ether with Message",
+    swipSwapV3Service = "Utilize the swip swap service",
+    takeProfits = "Take Profits",
+    executeCommunityInvestment = "Execute Community Investment",
+    sellFreedomCash = "Sell Freedom Cash"
+}
+
 export class Player {
 
     private readonly freedomCashRocks = true
@@ -16,20 +29,53 @@ export class Player {
     private roundIsActive = false
     private broker: Broker
     private logger: Logger
-    private mode: EMode
     private bollinger: Bollinger
 
-    public constructor(broker: Broker, logger: Logger, mode: EMode) {
+    public constructor(broker: Broker, logger: Logger) {
         this.logger = logger
         this.broker = broker
-        this.mode = mode
         this.bollinger = new Bollinger(27, logger)
     }
-    private async playBollinger(minHistoryLength: number, factor: number) {
+
+    public async play(sleepTime: number, minHistoryLength: number, spreadFactor: number, action: EActions, mode: EMode) {
+        if (this.partyIsOn === true) { throw Error("Already Playing") }
+        this.partyIsOn = true
+        while (this.freedomCashRocks && !this.roundIsActive) { // protecting against too low sleepTime value
+            this.roundIsActive = true
+            try {
+                await this.playRound(minHistoryLength, spreadFactor, action, mode)
+            } catch (error) {
+                this.logger.error(error)
+            }
+            await sleep(sleepTime)
+            this.roundIsActive = false
+        }
+    }
+    private async playRound(minHistoryLength: number, spreadFactor: number, action: EActions, mode: EMode): Promise<void> {
+        this.logger.info(`playing round with ${minHistoryLength} ${spreadFactor} ${action} ${mode}`)
+        if (minHistoryLength > 0 && spreadFactor > 0) {
+            if (mode === EMode.bollingerDemo) {
+                await this.playBollinger(minHistoryLength, spreadFactor, mode)
+            } else if (mode === EMode.bollingerReal) {
+                await this.playBollinger(minHistoryLength, spreadFactor, mode)
+            }
+        } else if (minHistoryLength === 0 && spreadFactor === 0) {
+            if (mode === EMode.actionRandom){
+                const index = Math.round((Math.random() * ((6 - 1) - 0) + 0))
+                const randomAction = Object.values(EActions)[index]
+                this.logger.info(randomAction)
+                await this.execute(randomAction)
+            } else if (mode === EMode.actionSpecific) {
+                await this.execute(action)
+            }
+        }
+        await this.broker.logFundamentals()
+    }
+    private async playBollinger(minHistoryLength: number, factor: number, mode: EMode) {
         this.logger.info("\n\n*************************** Pulses Of Freedom ***************************")
         await this.broker.logFundamentals()
-        let price = 9000000 
-        if (this.mode === EMode.BOLLINGERREAL) {
+        let price: number
+        if (mode === EMode.bollingerReal) {
             price = await this.broker.getBuyPrice(BlockchainHelper.convertToWei(1))
         } else {
             price = Math.round((Math.random() * (81 - 9) + 9))
@@ -37,85 +83,54 @@ export class Player {
         this.bollinger.addToPriceHistory(price)
         const investmentDecision = this.bollinger.getInvestmentDecision(minHistoryLength, factor)
         if (investmentDecision == "buy") {
-            if (this.mode === EMode.BOLLINGERDEMO){
+            if (mode === EMode.bollingerDemo) {
                 this.logger.info("not really buying because we are in demo mode")
-            } else if (this.mode === EMode.BOLLINGERREAL) {
+            } else if (mode === EMode.bollingerReal) {
                 await this.buy()
             }
         } else if (investmentDecision == "sell") {
             await this.sell()
-        }        
-        return 
-    }
-    public async play(sleepTime: number, action?: string) {
-        if (this.partyIsOn === true) { throw Error("Already Playing") }
-        this.partyIsOn = true
-        while (this.freedomCashRocks && !this.roundIsActive) { // protecting against too low sleepTime value
-            this.roundIsActive = true
-            try {
-                if (action !== undefined) {
-                    await this.execute(action)
-                } else if (this.mode === EMode.RANDOM) {
-                    await this.execute(this.getRandomOption())
-                } else if (this.mode === EMode.BOLLINGERDEMO) {
-                    await this.playBollinger(3, 3)
-                } else if (this.mode === EMode.BOLLINGERREAL) {
-                    await this.playBollinger(27, 3)
-                    
-                }
-                await this.broker.logFundamentals()
-            } catch (error) {
-                this.logger.error(error.message)
-                this.logger.error(error)
-            }
-            await sleep(sleepTime)
-            this.roundIsActive = false
         }
+        return
     }
-    private async execute(action: string) {
+    private async execute(action: EActions): Promise<void> {
         switch (action) {
-            case "voteForGeoCash": {
+            case EActions.voteForGeoCash: {
                 return this.broker.voteFor("geoCashing", BlockchainHelper.VITALIK, 999, "geil")
             }
-            case "voteForInvestment": {
+            case EActions.voteForInvestment: {
                 return this.broker.voteFor("investmentBet", BlockchainHelper.UNI, 9999)
             }
-            case "voteForPublicGood": {
+            case EActions.voteForPublicGood: {
                 return this.broker.voteFor("publicGoodsFunding", BlockchainHelper.POD, 999)
             }
-            case "sendETHWithMessage": {
+            case EActions.sendETHWithMessage: {
                 return this.broker.sendETHWithMessage(BlockchainHelper.VITALIK, "Hello Free World", 0.000009)
             }
-            case "swipSwapV3Service": {
+            case EActions.swipSwapV3Service: {
                 return this.broker.swipSwapV3Service(BlockchainHelper.WETH, BlockchainHelper.UNI, 0.009, 3000, 30)
             }
-            case "takeProfits": {
+            case EActions.takeProfits: {
                 return this.broker.takeProfits(BlockchainHelper.UNI, 1, 3000, 70)
             }
-            case "executeCommunityInvestment": {
+            case EActions.executeCommunityInvestment: {
                 return this.broker.executeCommunityInvestment(BlockchainHelper.UNI, 3000, 30)
             }
-            case "sellFreedomCash": {
+            case EActions.sellFreedomCash: {
                 return this.broker.sellFreedomCash(999)
             }
-            default: throw new Error("unknown option")
+            default: throw new Error(`unknown action: ${action} (typeOfAction ${typeof(action)})`)
         }
     }
-    private getRandomOption(): string {
-        const options = [
-            "voteForGeoCash",
-            "voteForInvestment",
-            "voteForPublicGood",
-            "sendETHWithMessage",
-            "swipSwapV3Service",
-            "takeProfits",
-            "executeCommunityInvestment",
-            "sellFreedomCash"
-        ]
-        const index = Math.round((Math.random() * ((options.length - 1) - 0) + 0))
-        return options[index]
-    }
-    
+    // private getRandomAction(): EActions {
+    //     const index = Math.round((Math.random() * ((6 - 1) - 0) + 0))
+    //     this.logger.info(index)
+    //     this.logger.info(EActions[index])
+    //     return EActions[index]
+    //     // return Object.values(EActions)[index]
+    //     // return options[index]
+    // }
+
     protected async buy(): Promise<void> {
         // see example implementation in https://github.com/monique-baumann/FreedomCash/tree/main/deno/Monique.ts
     }

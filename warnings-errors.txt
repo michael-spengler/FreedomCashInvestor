@@ -60,3 +60,42 @@ WARNING Fri Dec 29 2023 14:17:39 GMT+0100 (Central European Standard Time) hmm
 WARNING Fri Dec 29 2023 14:17:39 GMT+0100 (Central European Standard Time) hmm
 WARNING Fri Dec 29 2023 14:17:41 GMT+0100 (Central European Standard Time) hmm
 WARNING Fri Dec 29 2023 14:17:41 GMT+0100 (Central European Standard Time) hmm
+ERROR Fri Dec 29 2023 15:53:20 GMT+0100 (Central European Standard Time) Error: unknown option
+    at Player.execute (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:120:28)
+    at Player.playRound (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:65:28)
+    at Player.play (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:46:28)
+    at file:///home/master/Desktop/deno-modules/freedom_cash_investor/usage-example-actions-random.ts:17:14
+    at Object.runMicrotasks (ext:core/01_core.js:820:30)
+    at processTicksAndRejections (ext:deno_node/_next_tick.ts:53:10)
+    at runNextTicks (ext:deno_node/_next_tick.ts:71:3)
+    at eventLoopTick (ext:core/01_core.js:188:21)
+ERROR Fri Dec 29 2023 15:53:29 GMT+0100 (Central European Standard Time) Error: unknown option
+    at Player.execute (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:120:28)
+    at Player.playRound (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:65:28)
+    at Player.play (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:46:28)
+    at eventLoopTick (ext:core/01_core.js:196:13)
+    at async file:///home/master/Desktop/deno-modules/freedom_cash_investor/usage-example-actions-random.ts:17:1
+ERROR Fri Dec 29 2023 15:53:38 GMT+0100 (Central European Standard Time) Error: unknown option
+    at Player.execute (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:120:28)
+    at Player.playRound (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:65:28)
+    at Player.play (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:46:28)
+    at eventLoopTick (ext:core/01_core.js:196:13)
+    at async file:///home/master/Desktop/deno-modules/freedom_cash_investor/usage-example-actions-random.ts:17:1
+ERROR Fri Dec 29 2023 15:53:47 GMT+0100 (Central European Standard Time) Error: unknown option
+    at Player.execute (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:120:28)
+    at Player.playRound (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:65:28)
+    at Player.play (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:46:28)
+    at eventLoopTick (ext:core/01_core.js:196:13)
+    at async file:///home/master/Desktop/deno-modules/freedom_cash_investor/usage-example-actions-random.ts:17:1
+ERROR Fri Dec 29 2023 15:53:56 GMT+0100 (Central European Standard Time) Error: unknown option
+    at Player.execute (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:120:28)
+    at Player.playRound (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:65:28)
+    at Player.play (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:46:28)
+    at eventLoopTick (ext:core/01_core.js:196:13)
+    at async file:///home/master/Desktop/deno-modules/freedom_cash_investor/usage-example-actions-random.ts:17:1
+ERROR Fri Dec 29 2023 15:54:05 GMT+0100 (Central European Standard Time) Error: unknown option
+    at Player.execute (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:120:28)
+    at Player.playRound (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:65:28)
+    at Player.play (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/player.ts:46:28)
+    at eventLoopTick (ext:core/01_core.js:196:13)
+    at async file:///home/master/Desktop/deno-modules/freedom_cash_investor/usage-example-actions-random.ts:17:1
