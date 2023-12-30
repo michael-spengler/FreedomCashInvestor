@@ -21,6 +21,14 @@ export enum EActions {
     sellFreedomCash = "Sell Freedom Cash"
 }
 
+export enum EDataTypes {
+    masterData,
+    gamingData,
+    pricingData,
+    budgetData,
+    operationalData
+}
+
 export class MoniqueBaumann {
 
     private readonly freedomCashRocks = true
@@ -29,11 +37,13 @@ export class MoniqueBaumann {
     private broker: Broker
     private logger: Logger
     private bollinger: Bollinger
+    private interestedIn: EDataTypes[] = []
 
-    public constructor(broker: Broker, logger: Logger) {
+    public constructor(broker: Broker, logger: Logger, interestedIn: EDataTypes[]) {
         this.logger = logger
         this.broker = broker
         this.bollinger = new Bollinger(27, logger)
+        this.interestedIn= interestedIn
     }
 
     public async play(sleepTime: number, minHistoryLength: number, spreadFactor: number, action: EActions, mode: EMode) {
@@ -51,7 +61,6 @@ export class MoniqueBaumann {
         }
     }
     private async playRound(minHistoryLength: number, spreadFactor: number, action: EActions, mode: EMode): Promise<void> {
-        this.logger.info(`playing round with ${minHistoryLength} ${spreadFactor} ${action} ${mode}`)
         if (minHistoryLength > 0 && spreadFactor > 0) {
             if (mode === EMode.bollingerDemo) {
                 await this.playBollinger(minHistoryLength, spreadFactor, mode)
@@ -62,13 +71,12 @@ export class MoniqueBaumann {
             if (mode === EMode.actionRandom) {
                 const index = Math.round((Math.random() * ((6 - 1) - 0) + 0))
                 const randomAction = Object.values(EActions)[index]
-                this.logger.info(randomAction)
                 await this.execute(randomAction)
             } else if (mode === EMode.actionSpecific) {
                 await this.execute(action)
             }
         }
-        await this.broker.logFundamentals()
+        await this.broker.logFundamentals(this.interestedIn)
     }
     private async playBollinger(minHistoryLength: number, factor: number, mode: EMode) {
         this.logger.info("\n\n*************************** Pulses Of Freedom ***************************")
@@ -94,14 +102,14 @@ export class MoniqueBaumann {
     }
     private async execute(action: EActions): Promise<void> {
         switch (action) {
-            case EActions.voteForGeoCash: {
-                return this.broker.voteFor("geoCashing", Helper.VITALIK, 999, "geil")
-            }
             case EActions.voteForInvestment: {
                 return this.broker.voteFor("investmentBet", Helper.UNI, 9999)
             }
             case EActions.voteForPublicGood: {
-                return this.broker.voteFor("publicGoodsFunding", Helper.POD, 999)
+                return this.broker.voteFor("publicGoodsFunding", Helper.OPDonations, 999)
+            }
+            case EActions.voteForGeoCash: {
+                return this.broker.voteFor("geoCashing", Helper.VITALIK, 999, "geil")
             }
             case EActions.sendETHWithMessage: {
                 return this.broker.sendETHWithMessage(Helper.VITALIK, "Hello Free World", 0.000009)
@@ -121,14 +129,6 @@ export class MoniqueBaumann {
             default: throw new Error(`unknown action: ${action} (typeOfAction ${typeof (action)})`)
         }
     }
-    // private getRandomAction(): EActions {
-    //     const index = Math.round((Math.random() * ((6 - 1) - 0) + 0))
-    //     this.logger.info(index)
-    //     this.logger.info(EActions[index])
-    //     return EActions[index]
-    //     // return Object.values(EActions)[index]
-    //     // return options[index]
-    // }
 
     protected async buy(): Promise<void> {
         // see example implementation in https://github.com/monique-baumann/FreedomCash/tree/main/deno/Monique.ts

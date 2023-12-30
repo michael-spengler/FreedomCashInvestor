@@ -1,5 +1,6 @@
 import { ethers, Logger } from '../deps.ts';
 import { Helper } from './helper.ts';
+import { EDataTypes } from './monique-baumann.ts';
 
 export class Broker {
 
@@ -16,7 +17,7 @@ export class Broker {
     }
 
     public async voteFor(voteType: string, asset: string, amountToBeBought: number, text?: string): Promise<void> {
-        this.logger.info(`voting for ${voteType}`)
+        this.logger.info(`\nvoting for ${voteType} for asset ${asset} with amountToBeBought ${amountToBeBought}`)
         let balance = await this.contract.balanceOf(Helper.FC)
         this.logger.debug(`sc balance before: ${balance}`)
         const amountInWei = Helper.convertToWei(amountToBeBought)
@@ -36,16 +37,16 @@ export class Broker {
     }
 
     public async sellFreedomCash(amount: number): Promise<void> {
-        this.logger.info("selling Freedom Cash")
+        this.logger.info("\nselling Freedom Cash")
         let balance = await this.contract.balanceOf(Helper.FC)
         this.logger.debug(`sc balance before: ${balance}`)
         const sellPrice = await this.contract.getSellPrice()
-        await this.contract.sellFreedomCash((this.bcHelper.convertToWei(amount)), sellPrice)
+        await this.contract.sellFreedomCash((Helper.convertToWei(amount)), sellPrice)
         balance = await this.contract.balanceOf(Helper.FC)
         this.logger.info(`sc balance after : ${balance}`)
     }
     public async executeCommunityInvestment(asset: string, poolFee: number, maxSlip: number) {
-        this.logger.info("executing community investment")
+        this.logger.info("\nexecuting community investment")
         const investmentBudget = await this.contract.investmentBudget()
         if (investmentBudget < BigInt(99 * 10 ** 15)) {
             throw new Error(`investment budget only at ${BigInt(investmentBudget)}`)
@@ -58,26 +59,37 @@ export class Broker {
         }
     }
 
-    public async takingProfitsMakesSense(): Promise<boolean> {
-        const buyPrice = await this.contract.getBuyPrice(this.bcHelper.convertToWei(1))
+    public async takingProfitsMakesSense(asset: string, amount): Promise<boolean> {
+        const buyPrice = await this.contract.getBuyPrice(Helper.convertToWei(1))
         const sellPrice = await this.contract.getSellPrice()
         if ((sellPrice + (sellPrice * (BigInt(9) / BigInt(100)))) <= buyPrice) {
-            return true;
+            const assetContract = await this.bcHelper.getAssetContract(asset)
+            const balance = await assetContract.balanceOf(Helper.FC)
+            if (balance >= Helper.convertToWei(amount)) {
+                this.logger.debug(`balance of ${asset} in our contract: ${balance}`)
+                return true;
+            } else {
+                this.logger.warning(`balance of ${asset} in our contract: ${balance} too low to sell ${amount}`)
+                return false;
+            }
         } else {
-            return false;
+            this.logger.warning(`we would only sell ${asset} if (buyPrice > sellPrice * 1.09)`)
         }
+        return false;
     }
     public async takeProfits(asset: string, amount: number, poolFee: number, maxSlip: number): Promise<void> {
-        if (this.takingProfitsMakesSense()) {
+        if (await this.takingProfitsMakesSense(asset, amount)) {
 
-            const amountInWei = this.bcHelper.convertToWei(amount)
+            const amountInWei = Helper.convertToWei(amount)
             const amountOutMinimum = await this.contract.getAmountOutMinimum(asset, Helper.WETH, amountInWei, poolFee, maxSlip)
-            this.logger.info(`taking profits by selling ${amount} ${asset} (${amountInWei}) to receive at least: ${amountOutMinimum} ${Helper.WETH}`)
+            this.logger.info(`\ntaking profits by selling ${amount} ${asset} (${amountInWei}) to receive at least: ${amountOutMinimum} ${Helper.WETH}`)
             try {
                 await this.contract.takeProfits(asset, amountInWei, poolFee, maxSlip);
             } catch (error) {
                 alert(error.message);
             }
+        } else {
+            this.logger.warning(`It seems unreasonable to sell ${amount} ${asset} atm.`)
         }
     }
     public async getAmountOutMinimum(assetIn: string, assetOut: string, amountIn: number, poolFee: number, maxSlip: number): Promise<number> {
@@ -87,11 +99,10 @@ export class Broker {
         return amountOutMin
     }
     public async swipSwapV3Service(tIn: string, tOut: string, amount: number, poolFee: number, maxSlip: number): Promise<void> {
-
         const amountInWei = Helper.convertToWei(amount)
         const amountOutMinimum =
             await this.contract.getAmountOutMinimum(Helper.WETH, Helper.UNI, amountInWei, poolFee, maxSlip)
-        this.logger.debug(`using the SwipSwapV3Service to swap ${amount} ${tIn} to ${tOut} with minimum output ${amountOutMinimum}, poolFee: ${poolFee}, maxSlip: ${maxSlip}`)
+        this.logger.info(`\nusing the SwipSwapV3Service to swap ${amount} ${tIn} to ${tOut} with minimum output ${amountOutMinimum}, poolFee: ${poolFee}, maxSlip: ${maxSlip}`)
         try {
             let result = await this.contract.swipSwapV3Service(tIn, tOut, poolFee, amountOutMinimum, { value: amountInWei });
         } catch (error) {
@@ -104,8 +115,13 @@ export class Broker {
     public async sendETHWithMessage(target: string, message: string, amount: number): Promise<void> {
         const encodedMessage = ethers.encodeBytes32String(message)
         const amountInWei = Helper.convertToWei(amount)
-        this.logger.debug(`sending ${amount} ETH (${amountInWei}) WEI with Message: ${message}`)
-        // await this.contract.sendETHWithMessage(target, encodedMessage, { value: BigInt(amountInWei) })
+        this.logger.info(`\nsending ${amount} ETH (${amountInWei} WEI) with Message: ${message}`)
+        let balance = await this.provider.getBalance(Helper.FC)
+        this.logger.debug(`sc balance before: ${balance}`)
+        const tx = await this.contract.sendETHWithMessage(target, encodedMessage, { value: BigInt(amountInWei) })
+        await tx.wait()
+        balance = await this.provider.getBalance(Helper.FC)
+        this.logger.debug(`sc balance after: ${balance}`)
     }
     public async getBuyPrice(amountToBeBought: number): Promise<BigInt> {
         const aToBeBought = BigInt(amountToBeBought);
@@ -202,7 +218,7 @@ export class Broker {
         return this.contract.allowance(owner, spender)
     }
     public async buyPrice(amountToBeBought: number): Promise<any> {
-        return this.contract.getBuyPrice(this.bcHelper.convertToWei(amountToBeBought))
+        return this.contract.getBuyPrice(Helper.convertToWei(amountToBeBought))
     }
     public async sellPrice(): Promise<any> {
         return this.contract.getSellPrice()
@@ -211,17 +227,9 @@ export class Broker {
         return this.contract.getPoolAddress(tIn, tOut, poolFee)
     }
 
-    public async logFundamentals(clientInterestedIn: string[] = []): Promise<void> {
-        if (clientInterestedIn === []) {
-            clientInterestedIn.push("master data")
-            clientInterestedIn.push("pricing data")
-            clientInterestedIn.push("operational data")
-            clientInterestedIn.push("budget data")
-            clientInterestedIn.push("gaming data")
-        } else {
-            clientInterestedIn = clientInterestedIn
-        }
-        if (clientInterestedIn.indexOf("master data") > 0) {
+    public async logFundamentals(clientInterestedIn: EDataTypes[]): Promise<void> {
+
+        if (clientInterestedIn.indexOf(EDataTypes.masterData) > -1) {
             this.logger.info("\n\n*************************** Master Data ***************************")
             this.logger.debug(`smartContractAddress: ${Helper.FC}`)
             this.logger.debug(`totalSupply: ${await this.totalSupply()}`)
@@ -232,7 +240,7 @@ export class Broker {
             this.logger.debug(`wethAddress: ${await this.wethAddress()}`)
         }
 
-        if (clientInterestedIn.indexOf("budget data") > 0) {
+        if (clientInterestedIn.indexOf(EDataTypes.budgetData) > -1) {
             this.logger.info("\n\n*************************** Budget Data ***************************")
             this.logger.debug(`amountOfETHInSmartContract: ${await this.amountOfETHInSmartContract()}`)
             this.logger.debug(`balanceOf Smart Contract: ${await this.balanceOf()}`)
@@ -241,14 +249,21 @@ export class Broker {
             this.logger.debug(`geoCashingBudget: ${await this.geoCashingBudget()}`)
         }
 
-        if (clientInterestedIn.indexOf("gaming data") > 0) {
+        if (clientInterestedIn.indexOf(EDataTypes.gamingData) > -1) {
             this.logger.info("\n\n*************************** Gaming Data ***************************")
             this.logger.debug(`addressOfHighestSoFarInvestment: ${await this.addressOfHighestSoFarInvestment()}`)
             this.logger.debug(`addressOfHighestSoFarPublicGood: ${await this.addressOfHighestSoFarPublicGood()}`)
             this.logger.debug(`addressOfHighestSoFarGeoCash: ${await this.addressOfHighestSoFarGeoCash()}`)
+            this.logger.debug(`investmentCandidatesAt0: ${await this.investmentCandidatesAt(0)}`)
+            this.logger.debug(`investmentCandidatesAt1: ${await this.investmentCandidatesAt(1)}`)
+            this.logger.debug(`publicGoodCandidatesAt0: ${await this.publicGoodCandidatesAt(0)}`)
+            this.logger.debug(`publicGoodCandidatesAt1: ${await this.publicGoodCandidatesAt(1)}`)
+            this.logger.debug(`geoCashingCandidatesAt0: ${await this.geoCashingCandidatesAt(0)}`)
+            this.logger.debug(`geoCashingCandidatesAt1: ${await this.geoCashingCandidatesAt(1)}`)
+
         }
 
-        if (clientInterestedIn.indexOf("operational data") > 0) {
+        if (clientInterestedIn.indexOf(EDataTypes.operationalData) > -1) {
             this.logger.info("\n\n*************************** Operational Data ***************************")
             this.logger.debug(`iCCounter: ${await this.iCCounter()}`)
             this.logger.debug(`pGCCounter: ${await this.pGCCounter()}`)
@@ -258,19 +273,13 @@ export class Broker {
             this.logger.debug(`gCCIDsAtVitalik: ${await this.gCCIDAt(Helper.FC)}`)
             this.logger.debug(`poolAddress: ${await this.getPoolAddress(Helper.WETH, Helper.UNI, 3000)}`)
             this.logger.debug(`investmentPriceForAsset: ${await this.investmentPriceForAsset(Helper.CULT, await this.getPoolAddress(Helper.WETH, Helper.UNI, 3000))}`)
-            this.logger.debug(`amountOutMinimum: ${await this.amountOutMinimum(Helper.WETH, Helper.UNI, this.bcHelper.convertToWei(9), 3000, 30)}`)
-            this.logger.debug(`investmentCandidatesAt0: ${await this.investmentCandidatesAt(0)}`)
-            this.logger.debug(`investmentCandidatesAt1: ${await this.investmentCandidatesAt(1)}`)
-            this.logger.debug(`publicGoodCandidatesAt0: ${await this.publicGoodCandidatesAt(0)}`)
-            this.logger.debug(`publicGoodCandidatesAt1: ${await this.publicGoodCandidatesAt(1)}`)
-            this.logger.debug(`geoCashingCandidatesAt0: ${await this.geoCashingCandidatesAt(0)}`)
-            this.logger.debug(`geoCashingCandidatesAt1: ${await this.geoCashingCandidatesAt(1)}`)
+            this.logger.debug(`amountOutMinimum: ${await this.amountOutMinimum(Helper.WETH, Helper.UNI, Helper.convertToWei(9), 3000, 30)}`)
             this.logger.debug(`allowance from contract to router: ${await this.allowance(Helper.FC, Helper.ROUTER)}`)
         }
 
-        if (clientInterestedIn.indexOf("pricing data") > 0) {
+        if (clientInterestedIn.indexOf(EDataTypes.pricingData) > -1) {
             this.logger.info("\n\n*************************** Pricing Data ***************************")
-            this.logger.debug(`buyPrice: ${await this.buyPrice(this.bcHelper.convertToWei(9))}`)
+            this.logger.debug(`buyPrice: ${await this.buyPrice(Helper.convertToWei(9))}`)
             this.logger.debug(`sellPrice: ${await this.sellPrice()}`)
         }
     }
