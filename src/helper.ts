@@ -6,16 +6,14 @@ export class Helper {
     public static readonly CULT = "0xf0f9D895aCa5c8678f706FB8216fa22957685A13"
     public static readonly POD = "0xE90CE7764d8401d19ed3733a211bd3b06c631Bc0"
     public static readonly SHIB = "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE"
-    public static readonly FC = "0x48eeA15750BD94A4f36CbB3c95Da0D8Caa3CA7E8"
+    public static readonly FC = "0x47B5Aa62Bc83C809331448D617da177315068F9f"
     public static readonly OPDonations = "0x2D1bEB3e41D90d7F9756e92c3061265206a661A2"
     public static readonly WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
     public static readonly UNI = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984"
     public static readonly VITALIK = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
 
     public static instance: Helper
-    // 0x1d42064Fc4Beb5F8aAF85F4617AE8b3b5B8Bd801
-    // 3099155472841317
-    // 322668549146131189643
+
     public static async getInstance(providerURL: string): Promise<Helper> {
         if (Helper.instance == undefined) {
             Helper.instance = new Helper(providerURL)

@@ -18,7 +18,7 @@ interestedIn.push(EDataTypes.pricingData)
 
 const moniqueBaumann = new MoniqueBaumann(broker, logger, interestedIn)
 
-const sleepTime = 9
+const sleepTime = 27
 const minHistoryLength = 0
 const spreadFactor = 0
 const specificAction = undefined

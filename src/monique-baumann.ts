@@ -69,7 +69,7 @@ export class MoniqueBaumann {
             }
         } else if (minHistoryLength === 0 && spreadFactor === 0) {
             if (mode === EMode.actionRandom) {
-                const index = Math.round((Math.random() * ((6 - 1) - 0) + 0))
+                const index = Math.round((Math.random() * ((8 - 1) - 0) + 0))
                 const randomAction = Object.values(EActions)[index]
                 await this.execute(randomAction)
             } else if (mode === EMode.actionSpecific) {
@@ -101,6 +101,7 @@ export class MoniqueBaumann {
         return
     }
     private async execute(action: EActions): Promise<void> {
+        this.logger.info(action)
         switch (action) {
             case EActions.voteForInvestment: {
                 return this.broker.voteFor("investmentBet", Helper.UNI, 9999)
@@ -121,7 +122,7 @@ export class MoniqueBaumann {
                 return this.broker.takeProfits(Helper.UNI, 1, 3000, 70)
             }
             case EActions.executeCommunityInvestment: {
-                return this.broker.executeCommunityInvestment(Helper.UNI, 3000, 30)
+                return this.broker.executeCommunityInvestment(Helper.UNI, 3000, 70)
             }
             case EActions.sellFreedomCash: {
                 return this.broker.sellFreedomCash(999)

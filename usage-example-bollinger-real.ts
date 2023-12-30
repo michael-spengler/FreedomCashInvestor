@@ -16,7 +16,7 @@ interestedIn.push(EDataTypes.pricingData)
 interestedIn.push(EDataTypes.masterData)
 interestedIn.push(EDataTypes.operationalData)
 
-const moniqueBaumann = new MoniqueBaumann(broker, logger)
+const moniqueBaumann = new MoniqueBaumann(broker, logger, interestedIn)
 
 let sleepTime = 81
 let minHistoryLength = 27
