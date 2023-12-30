@@ -11,14 +11,14 @@ export enum EMode {
 }
 
 export enum EActions {
-    voteForGeoCash = "Vote for GeoCash",
     voteForInvestment = "Vote for Investment",
     voteForPublicGood = "Vote for Public Good",
-    sendETHWithMessage = "Send Ether with Message",
-    swipSwapV3Service = "Utilize the swip swap service",
-    takeProfits = "Take Profits",
+    voteForGeoCash = "Vote for GeoCash",
     executeCommunityInvestment = "Execute Community Investment",
-    sellFreedomCash = "Sell Freedom Cash"
+    takeProfits = "Take Profits",
+    sellFreedomCash = "Sell Freedom Cash",
+    swipSwapV3Service = "Utilize the swip swap service",
+    sendETHWithMessage = "Send Ether with Message",
 }
 
 export enum EDataTypes {
