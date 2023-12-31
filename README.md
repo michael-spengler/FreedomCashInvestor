@@ -7,21 +7,7 @@ This [deno module](https://deno.land/x/freedom_cash_investor) stabilizes the buy
 The coolest usage example you might find via https://FreedomCash.org.  
 
 ```ts
-import { Investor } from "https://deno.land/x/freedom_cash_investor/mod.ts"
-import { Logger } from 'https://deno.land/x/log@v1.1.1/mod.ts'
 
-const minLevelForConsole = 'DEBUG' 
-const minLevelForFile = 'WARNING' 
-const fileName = "./warnings-errors.txt"
-const pureInfo = true // leaving out e.g. the time info
-export const logger = await Logger.getInstance(minLevelForConsole, minLevelForFile, fileName, pureInfo)
-
-const minHistoryLength = 3
-const bFactor = 6
-const sleepTimeInSeconds = 27
-const relevantHistoryLength = 45
-const investor: Investor = await Investor.getInstance(relevantHistoryLength, sleepTimeInSeconds, logger)
-await investor.startTheParty(minHistoryLength, bFactor)
 ```
 
 ## Execute Usage Example

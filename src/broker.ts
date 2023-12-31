@@ -8,7 +8,7 @@ export class Broker {
 
     public static async getInstance(): Promise<Broker> {
         if (Broker.instance === undefined) {
-            const logger = await Logger.getInstance()
+            const logger = await Helper.getLogger()
             const helper = await Helper.getInstance()
             Broker.instance = new Broker(helper, logger)
         }
@@ -195,8 +195,9 @@ export class Broker {
     public async getInvestmentPriceForAsset(asset: string, poolAddress: string): Promise<any> {
         return this.contract.getInvestmentPriceForAsset(asset, poolAddress)
     }
-    public async getAmountOutMinimum(tIn: string, tOut: string, amount: BigInt, poolFee: number, maxSlip: number): Promise<any> {
-        return this.contract.getAmountOutMinimum(tIn, tOut, amount, poolFee, maxSlip)
+    public async getAmountOutMinimum(tIn: string, amount: bigint, price: bigint, maxSlip: number): Promise<any> {
+        this.logger.warning(amount)
+        return this.contract.getAmountOutMinimum(tIn, amount, price, maxSlip)
     }
     public async gCCCounter(): Promise<any> {
         return this.contract.gCCCounter()

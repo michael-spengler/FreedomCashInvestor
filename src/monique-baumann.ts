@@ -36,7 +36,7 @@ export class MoniqueBaumann {
 
     public static async getInstance(interestedIn: EDataTypes[]): Promise<void> {
         if (MoniqueBaumann.instance === undefined) {
-            const logger = await Logger.getInstance()
+            const logger = await Helper.getLogger()
             const helper = await Helper.getInstance()
             const broker = await Broker.getInstance()
             const checker = await Checker.getInstance()

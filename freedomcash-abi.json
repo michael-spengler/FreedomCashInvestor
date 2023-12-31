@@ -5,27 +5,6 @@
 		"type": "constructor"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "msgValueContent",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "buyPriceContent",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "amountToBeBought",
-				"type": "uint256"
-			}
-		],
-		"name": "ExpectedValueMismatch",
-		"type": "error"
-	},
-	{
 		"inputs": [],
 		"name": "SellPriceMightHaveDropped",
 		"type": "error"
@@ -388,19 +367,14 @@
 				"type": "address"
 			},
 			{
-				"internalType": "address",
-				"name": "tOut",
-				"type": "address"
-			},
-			{
 				"internalType": "uint256",
 				"name": "aIn",
 				"type": "uint256"
 			},
 			{
-				"internalType": "uint24",
-				"name": "poolFee",
-				"type": "uint24"
+				"internalType": "uint256",
+				"name": "price",
+				"type": "uint256"
 			},
 			{
 				"internalType": "uint24",
@@ -730,7 +704,7 @@
 				"type": "uint256"
 			}
 		],
-		"name": "publicGoodCandidates",
+		"name": "pubGoodCandidates",
 		"outputs": [
 			{
 				"internalType": "address",
@@ -753,7 +727,7 @@
 	},
 	{
 		"inputs": [],
-		"name": "publicGoodsFundingBudget",
+		"name": "pubGoodsFundingBudget",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -1003,7 +977,7 @@
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "publicGoodWallet",
+				"name": "pubGoodWallet",
 				"type": "address"
 			},
 			{
