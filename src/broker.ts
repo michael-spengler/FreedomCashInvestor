@@ -174,8 +174,8 @@ export class Broker {
     public async liquidityBudget(): Promise<any> {
         return this.contract.liquidityBudget()
     }
-    public async publicGoodsFundingBudget(): Promise<any> {
-        return this.contract.publicGoodsFundingBudget()
+    public async pubGoodsFundingBudget(): Promise<any> {
+        return this.contract.pubGoodsFundingBudget()
     }
     public async investmentBudget(): Promise<any> {
         return this.contract.investmentBudget()
@@ -196,7 +196,6 @@ export class Broker {
         return this.contract.getInvestmentPriceForAsset(asset, poolAddress)
     }
     public async getAmountOutMinimum(tIn: string, amount: bigint, price: bigint, maxSlip: number): Promise<any> {
-        this.logger.warning(amount)
         return this.contract.getAmountOutMinimum(tIn, amount, price, maxSlip)
     }
     public async gCCCounter(): Promise<any> {
@@ -252,7 +251,7 @@ export class Broker {
             this.logger.debug(`amountOfETHInSmartContract: ${ethers.formatEther(await this.amountOfETHInSmartContract())}`)
             this.logger.debug(`balanceOf Smart Contract: ${ethers.formatEther(await this.balanceOf())}`)
             this.logger.debug(`investmentBudget: ${ethers.formatEther(await this.investmentBudget())}`)
-            this.logger.debug(`publicGoodsFundingBudget: ${ethers.formatEther(await this.publicGoodsFundingBudget())}`)
+            this.logger.debug(`pubGoodsFundingBudget: ${ethers.formatEther(await this.pubGoodsFundingBudget())}`)
             this.logger.debug(`geoCashingBudget: ${ethers.formatEther(await this.geoCashingBudget())}`)
             this.logger.debug(`liquidityBudget: ${ethers.formatEther(await this.liquidityBudget())}`)
         }

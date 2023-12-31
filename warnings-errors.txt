@@ -143,3 +143,43 @@ WARNING Sun Dec 31 2023 12:50:44 GMT+0100 (Central European Standard Time) 10000
 WARNING Sun Dec 31 2023 12:54:24 GMT+0100 (Central European Standard Time) 1000000000000000000
 WARNING Sun Dec 31 2023 12:55:10 GMT+0100 (Central European Standard Time) 1000000000000000000
 WARNING Sun Dec 31 2023 12:55:25 GMT+0100 (Central European Standard Time) 1000000000000000000
+WARNING Sun Dec 31 2023 12:56:08 GMT+0100 (Central European Standard Time) 1000000000000000000
+ERROR Sun Dec 31 2023 12:56:19 GMT+0100 (Central European Standard Time) TypeError: this.contract.publicGoodsFundingBudget is not a function
+    at Broker.publicGoodsFundingBudget (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/broker.ts:178:30)
+    at Broker.logFundamentals (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/broker.ts:255:90)
+    at Object.runMicrotasks (ext:core/01_core.js:820:30)
+    at processTicksAndRejections (ext:deno_node/_next_tick.ts:53:10)
+    at runNextTicks (ext:deno_node/_next_tick.ts:71:3)
+    at eventLoopTick (ext:core/01_core.js:188:21)
+    at async MoniqueBaumann.playRound (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/monique-baumann.ts:96:9)
+    at async MoniqueBaumann.play (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/monique-baumann.ts:72:17)
+    at async file:///home/master/Desktop/deno-modules/freedom_cash_investor/usage-example-actions-random.ts:21:1
+WARNING Sun Dec 31 2023 12:56:48 GMT+0100 (Central European Standard Time) 1000000000000000000
+ERROR Sun Dec 31 2023 12:56:58 GMT+0100 (Central European Standard Time) TypeError: this.contract.publicGoodsFundingBudget is not a function
+    at Broker.publicGoodsFundingBudget (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/broker.ts:178:30)
+    at Broker.logFundamentals (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/broker.ts:255:90)
+    at Object.runMicrotasks (ext:core/01_core.js:820:30)
+    at processTicksAndRejections (ext:deno_node/_next_tick.ts:53:10)
+    at runNextTicks (ext:deno_node/_next_tick.ts:71:3)
+    at eventLoopTick (ext:core/01_core.js:188:21)
+    at async MoniqueBaumann.playRound (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/monique-baumann.ts:96:9)
+    at async MoniqueBaumann.play (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/monique-baumann.ts:72:17)
+    at async file:///home/master/Desktop/deno-modules/freedom_cash_investor/usage-example-actions-random.ts:21:1
+WARNING Sun Dec 31 2023 12:57:27 GMT+0100 (Central European Standard Time) 1000000000000000000
+ERROR Sun Dec 31 2023 12:57:38 GMT+0100 (Central European Standard Time) TypeError: this.contract.publicGoodsFundingBudget is not a function
+    at Broker.publicGoodsFundingBudget (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/broker.ts:178:30)
+    at Broker.logFundamentals (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/broker.ts:255:90)
+    at Object.runMicrotasks (ext:core/01_core.js:820:30)
+    at processTicksAndRejections (ext:deno_node/_next_tick.ts:53:10)
+    at runNextTicks (ext:deno_node/_next_tick.ts:71:3)
+    at eventLoopTick (ext:core/01_core.js:188:21)
+    at async MoniqueBaumann.playRound (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/monique-baumann.ts:96:9)
+    at async MoniqueBaumann.play (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/monique-baumann.ts:72:17)
+    at async file:///home/master/Desktop/deno-modules/freedom_cash_investor/usage-example-actions-random.ts:21:1
+WARNING Sun Dec 31 2023 12:58:07 GMT+0100 (Central European Standard Time) 1000000000000000000
+WARNING Sun Dec 31 2023 12:58:13 GMT+0100 (Central European Standard Time) balance of 0x1f9840a85d5af5bf1d1762f925bdaddc4201f984 in our contract: 0 too low to sell 1
+WARNING Sun Dec 31 2023 12:58:13 GMT+0100 (Central European Standard Time) It seems unreasonable to sell 1 0x1f9840a85d5af5bf1d1762f925bdaddc4201f984 atm.
+WARNING Sun Dec 31 2023 13:02:09 GMT+0100 (Central European Standard Time) 1000000000000000000
+WARNING Sun Dec 31 2023 13:02:12 GMT+0100 (Central European Standard Time) 1000000000000000000
+WARNING Sun Dec 31 2023 13:08:35 GMT+0100 (Central European Standard Time) 1000000000000000000
+WARNING Sun Dec 31 2023 13:08:38 GMT+0100 (Central European Standard Time) 1000000000000000000

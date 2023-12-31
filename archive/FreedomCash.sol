@@ -10,6 +10,7 @@ Utility:        Community investing in decentralized currencies while funding pu
 Liquidity:      The total supply of Freedom Cash is minted not to the developer or 
                 deployer but to the smart contract itself (see constructor address(this)). 
                 ETH liquidity is accrued automatically (see token economics diagram). 
+                You might consider contributing to https://deno.land/x/freedom_cash_investor.
 
 "Regulators":   Please think for yourself about the following while you go for a walk offline: 
                 The crimes of the "governments" you worked for, seem much more dangerous to humanity 
@@ -24,8 +25,6 @@ Liquidity:      The total supply of Freedom Cash is minted not to the developer 
                 we invite you to join us, learn with us, help us and enjoy also
                 the technical pulses of freedom block by block by block by block by block by block 
                 by block by block by block
-
-Contribute:     You might consider contributing to https://deno.land/x/freedom_cash_investor. 
 
 Wish:           Everyone who reads this with the best of intentions shall always have enough 
                 Freedom Cash stored within self hosted paperwallets which shall be utilized 
@@ -53,7 +52,7 @@ contract FreedomCash is ERC20 {
     uint256 public aCounter                 = 0;    
     uint256 public investmentBudget         = 0;
     uint256 public liquidityBudget          = 0;
-    uint256 public publicGoodsFundingBudget = 0;
+    uint256 public pubGoodsFundingBudget = 0;
     uint256 public geoCashingBudget         = 0;    
     struct ICandidateInfo {
         address cAddress;
@@ -80,14 +79,13 @@ contract FreedomCash is ERC20 {
         uint256 timestamp;
     }    
     mapping(uint256 => ICandidateInfo)  public investmentCandidates;
-    mapping(uint256 => PGCandidateInfo) public publicGoodCandidates;
+    mapping(uint256 => PGCandidateInfo) public pubGoodCandidates;
     mapping(uint256 => GCCandidateInfo) public geocashingCandidates;   
     mapping(uint256 => Attestation)     public attestations;
     mapping(address => uint256)         public iCIDs;
     mapping(address => uint256)         public pGCIDs;
     mapping(address => uint256)         public gCCIDs;
 
-    error ExpectedValueMismatch(uint256 msgValueContent, uint256 buyPriceContent, uint256 amountToBeBought);
     error SellPriceMightHaveDropped();
     error TransferOfETHFailed();
     error UnreasonableRequest();
@@ -102,44 +100,44 @@ contract FreedomCash is ERC20 {
             ICandidateInfo memory candi = ICandidateInfo(scAddress,0, 0, 0);
             investmentCandidates[iCCounter] = candi;
         }
-        uint256 votingPower = msg.value + balanceOf(msg.sender);
+        uint256 vPower = msg.value + balanceOf(msg.sender);
         investmentCandidates[iCIDs[scAddress]].score = 
-            investmentCandidates[iCIDs[scAddress]].score + votingPower;
+            investmentCandidates[iCIDs[scAddress]].score + vPower;
         uint256 check = Math.mulDiv(msg.value, 10**18, fCBuyPrice); 
-        if (check != fCAmount) { revert ExpectedValueMismatch(msg.value, fCBuyPrice, fCAmount); }
+        if (check != fCAmount) { revert UnreasonableRequest(); }
         this.transfer(msg.sender, fCAmount);
         investmentBudget = investmentBudget + Math.mulDiv(msg.value, 33, 100); 
         reconcileAndClear(); 
         if (investmentBudget >= (99 * 10**15)) {
-            investmentCandidates[iCIDs[scAddress]].eligibleRounds = investmentCandidates[iCIDs[scAddress]].eligibleRounds + 1;
+            address winner = getAddressOfHighestSoFar("publicGoodsFunding");
+            investmentCandidates[iCIDs[winner]].eligibleRounds = investmentCandidates[iCIDs[winner]].eligibleRounds + 1;
         } 
         aCounter = aCounter + 1;
         attestations[aCounter] = Attestation(msg.sender, scAddress, "investmentBet", msg.value, block.timestamp);
     }
-    function voteForPublicGood(address publicGoodWallet, uint256 fCBuyPrice, uint256 fCAmount) public payable {
-        if (pGCIDs[publicGoodWallet] == 0) { // new candidate
+    function voteForPublicGood(address pubGoodWallet, uint256 fCBuyPrice, uint256 fCAmount) public payable {
+        if (pGCIDs[pubGoodWallet] == 0) { // new candidate
             pGCCounter = pGCCounter + 1;
-            pGCIDs[publicGoodWallet] = pGCCounter;
-            PGCandidateInfo memory candi = PGCandidateInfo(publicGoodWallet, 0, 0);
-            publicGoodCandidates[pGCCounter] = candi;
+            pGCIDs[pubGoodWallet] = pGCCounter;
+            PGCandidateInfo memory candi = PGCandidateInfo(pubGoodWallet, 0, 0);
+            pubGoodCandidates[pGCCounter] = candi;
         }
-        uint256 votingPower = msg.value + balanceOf(msg.sender);
-        publicGoodCandidates[pGCIDs[publicGoodWallet]].score = 
-            publicGoodCandidates[pGCIDs[publicGoodWallet]].score + votingPower;
+        uint256 vPower = msg.value + balanceOf(msg.sender);
+        pubGoodCandidates[pGCIDs[pubGoodWallet]].score =  pubGoodCandidates[pGCIDs[pubGoodWallet]].score + vPower;
         uint256 check = Math.mulDiv(msg.value, 10**18, fCBuyPrice); 
-        if (check != fCAmount) { revert ExpectedValueMismatch(msg.value, fCBuyPrice, fCAmount); }
+        if (check != fCAmount) { revert UnreasonableRequest(); }
         this.transfer(msg.sender, fCAmount);        
-        publicGoodsFundingBudget = publicGoodsFundingBudget + Math.mulDiv(msg.value, 33, 100);
+        pubGoodsFundingBudget = pubGoodsFundingBudget + Math.mulDiv(msg.value, 33, 100);
         reconcileAndClear();
-        if(publicGoodsFundingBudget >= (99 * 10**15)) { 
+        if(pubGoodsFundingBudget >= (99 * 10**15)) { 
             address winner = getAddressOfHighestSoFar("publicGoodsFunding");
             (bool sent, ) = winner.call{value: 99 * 10**15}("Congratulations");
             if (sent == false) { revert TransferOfETHFailed(); }
-            publicGoodCandidates[pGCIDs[winner]].eligibleRounds = publicGoodCandidates[pGCIDs[winner]].eligibleRounds + 1;
-            publicGoodsFundingBudget = publicGoodsFundingBudget - 99 * 10**15;         
+            pubGoodCandidates[pGCIDs[winner]].eligibleRounds = pubGoodCandidates[pGCIDs[winner]].eligibleRounds + 1;
+            pubGoodsFundingBudget = pubGoodsFundingBudget - 99 * 10**15;         
         }  
         aCounter = aCounter + 1;
-        attestations[aCounter] = Attestation(msg.sender, publicGoodWallet, "publicGoodsFunding", msg.value, block.timestamp);
+        attestations[aCounter] = Attestation(msg.sender, pubGoodWallet, "publicGoodsFunding", msg.value, block.timestamp);
     }
     function voteForGeoCash(address geoCashAddress, string memory text, uint256 fCBuyPrice, uint256 fCAmount) public payable {
         if (gCCIDs[geoCashAddress] == 0) { // new candidate
@@ -148,11 +146,11 @@ contract FreedomCash is ERC20 {
             GCCandidateInfo memory candi = GCCandidateInfo(geoCashAddress, text,0, 0);
             geocashingCandidates[gCCCounter] = candi;
         } 
-        uint256 votingPower = msg.value + balanceOf(msg.sender);        
+        uint256 vPower = msg.value + balanceOf(msg.sender);        
         geocashingCandidates[gCCIDs[geoCashAddress]].score = 
-        geocashingCandidates[gCCIDs[geoCashAddress]].score + votingPower;
+        geocashingCandidates[gCCIDs[geoCashAddress]].score + vPower;
         uint256 check = Math.mulDiv(msg.value, 10**18, fCBuyPrice); 
-        if (check != fCAmount) { revert ExpectedValueMismatch(msg.value, fCBuyPrice, fCAmount); }
+        if (check != fCAmount) { revert UnreasonableRequest(); }
         this.transfer(msg.sender, fCAmount);        
         geoCashingBudget = geoCashingBudget + Math.mulDiv(msg.value, 33, 100);
         reconcileAndClear();   
@@ -179,7 +177,9 @@ contract FreedomCash is ERC20 {
     function takeProfits(address asset, uint256 amount, uint24 poolFee, uint24 maxSlip) public {
         if ((getSellPrice() + (getSellPrice() * 9/100)) > getBuyPrice(10**18)) { revert UnreasonableRequest(); }
         if(IERC20(asset).balanceOf(address(this)) < amount) { revert UnreasonableRequest(); }
-        uint256 amountOutMinimum = getAmountOutMinimum(asset, wethAddress, amount, poolFee, maxSlip);
+        address poolAddress = getPoolAddress(asset, wethAddress, poolFee);
+        uint256 price = getInvestmentPriceForAsset(asset, poolAddress);
+        uint256 amountOutMinimum = getAmountOutMinimum(asset, amount, price, maxSlip);
         swipSwapV3(asset, wethAddress, amount, poolFee, amountOutMinimum);
         reconcileAndClear();
     }    
@@ -208,9 +208,9 @@ contract FreedomCash is ERC20 {
             }
         } else if (gameType == "publicGoodsFunding") {
             for (uint256 i = 1; i <= pGCCounter; i++) {
-                if(publicGoodCandidates[i].score > highestSoFar) {
-                    highestSoFar = publicGoodCandidates[i].score;
-                    addressOfHighestSoFar = publicGoodCandidates[i].cAddress;
+                if(pubGoodCandidates[i].score > highestSoFar) {
+                    highestSoFar = pubGoodCandidates[i].score;
+                    addressOfHighestSoFar = pubGoodCandidates[i].cAddress;
                 }
             }            
         } else if (gameType == "geoCashing") {
@@ -231,21 +231,21 @@ contract FreedomCash is ERC20 {
         if (delta == 0) { revert UnreasonableRequest(); }
         if (delta > 99) { handlePotentialSwapProblems(delta, asset); }
         uint256 amount = (99 * 10**15) * delta;
-        uint256 amountOutMinimum = getAmountOutMinimum(wethAddress, asset, amount , poolFee, maxSlip);
+        address poolAddress = getPoolAddress(wethAddress, asset, poolFee);
+        uint256 price = getInvestmentPriceForAsset(asset, poolAddress);
+        uint256 amountOutMinimum = getAmountOutMinimum(wethAddress, amount, price, maxSlip);
         swipSwapV3(wethAddress, asset, amount, poolFee, amountOutMinimum);
         investmentBudget = investmentBudget - amount;  
         investmentCandidates[iCIDs[asset]].clearedRounds = investmentCandidates[iCIDs[asset]].clearedRounds + 1;
     }
     function handlePotentialSwapProblems(uint256 iRounds, address swapTroubleAsset) internal {
-        investmentBudget = investmentBudget - (99 * 10**15) * iRounds;  
+        investmentBudget = investmentBudget - ((99 * 10**15) * iRounds);  
         reconcileAndClear(); // making the best out of swap troubles 
         investmentCandidates[iCIDs[swapTroubleAsset]].clearedRounds  = investmentCandidates[iCIDs[swapTroubleAsset]].eligibleRounds;
     }    
-    function getAmountOutMinimum(address tIn, address tOut, uint256 aIn, uint24 poolFee, uint24 maxSlip) public view returns(uint256) {
-        uint256 price = getInvestmentPriceForAsset(tIn, getPoolAddress(tIn, tOut, poolFee));
-        uint256 expectedOutputAmount;
-        expectedOutputAmount = Math.mulDiv(aIn, 10**ERC20(tIn).decimals(), price);
-        return expectedOutputAmount - Math.mulDiv(expectedOutputAmount, maxSlip, 1000);
+    function getAmountOutMinimum(address tIn, uint256 aIn, uint256 price, uint24 maxSlip) public view returns(uint256) {
+        uint256 output = (aIn * 10**ERC20(tIn).decimals())  / price;
+        return output - ((output * maxSlip) / 1000);
     }
     function getPoolAddress(address t1, address t2, uint24 fee) public view returns(address) {
         return IUniswapV3Factory(factoryAddress).getPool(t1, t2, fee);
@@ -313,7 +313,7 @@ contract FreedomCash is ERC20 {
         reconcileAndClear();        
     } 
     function reconcileAndClear() internal {
-        liquidityBudget = address(this).balance - investmentBudget - geoCashingBudget - publicGoodsFundingBudget;
+        liquidityBudget = address(this).balance - investmentBudget - geoCashingBudget - pubGoodsFundingBudget;
     }
     function sendETHWithMessage(address payable target, bytes memory message) public payable {
         uint256 amount = Math.mulDiv(msg.value, 991, 1000); // send 99.1 percent - add 0.9 percent go to Freedom Cash Liquidity Budget
