@@ -2,7 +2,7 @@ import { ethers, Logger } from '../deps.ts';
 
 export class Helper {
 
-    public static readonly FC = "0xB1f820a63faADf27Ea3df7A7595e1a2b3C8d5a51"
+    public static readonly FC = "0xdB8042acaEa8d5656aDE8126c250789bfc023639"
     public static readonly ROUTER = "0xE592427A0AEce92De3Edee1F18E0157C05861564"
     public static readonly CULT = "0xf0f9D895aCa5c8678f706FB8216fa22957685A13"
     public static readonly POD = "0xE90CE7764d8401d19ed3733a211bd3b06c631Bc0"
@@ -11,6 +11,7 @@ export class Helper {
     public static readonly WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
     public static readonly UNI = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984"
     public static readonly VITALIK = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+    public static readonly CENTRALIZEDFRAUD = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
 
     public static instance: Helper
     public static logger: Logger

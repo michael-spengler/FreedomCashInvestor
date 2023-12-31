@@ -2,7 +2,6 @@ import { sleep, Logger } from "../deps.ts"
 import { Broker } from "./broker.ts"
 import { Helper } from "./helper.ts"
 import { Bollinger } from "./bollinger.ts"
-import { Checker } from "./checker.ts"
 
 export enum EMode {
     actionRandom,
@@ -42,8 +41,7 @@ export class MoniqueBaumann {
             const logger = await Helper.getLogger()
             const helper = await Helper.getInstance()
             const broker = await Broker.getInstance()
-            const checker = await Checker.getInstance()
-            MoniqueBaumann.instance = new MoniqueBaumann(broker, logger, checker, interestedIn)
+            MoniqueBaumann.instance = new MoniqueBaumann(broker, logger, interestedIn)
         }
         return MoniqueBaumann.instance
     }
@@ -130,13 +128,12 @@ export class MoniqueBaumann {
         this.logger.info(this.executedActionsCounters)
     }
     private async execute(action: EActions): Promise<void> {
-        await this.checker.checkConsistency()
 
         this.countActions(action)
 
         switch (action) {
             case EActions.voteForInvestment: {
-                return this.broker.voteFor("investmentBet", Helper.UNI, 9999)
+                return this.broker.voteFor("investmentBet", Helper.UNI, 9)
             }
             case EActions.voteForPublicGood: {
                 return this.broker.voteFor("publicGoodsFunding", Helper.OPDonations, 999)
@@ -145,11 +142,8 @@ export class MoniqueBaumann {
                 return this.broker.voteFor("geoCashing", Helper.VITALIK, 999, "geil")
             }
             case EActions.executeCommunityInvestment: {
-                // const highestSoFar = await this.broker.addressOfHighestSoFarInvestment()
                 const id = await this.broker.iCIDAt(Helper.UNI)
                 const candidate = await this.broker.investmentCandidatesAt(id)
-                console.log(candidate)
-                console.log(typeof(candidate))
                 const delta = candidate[1] - candidate[2]
                 if (delta > BigInt(0)) {
                     return this.broker.executeCommunityInvestment(Helper.UNI, 3000, 70)
@@ -160,9 +154,20 @@ export class MoniqueBaumann {
             }
             case EActions.takeProfits: {
                 const balance = await (await await this.broker.getAssetContract(Helper.UNI)).balanceOf(Helper.FC)
-                this.logger.error(balance)
-
-                return this.broker.takeProfits(Helper.UNI, (balance / BigInt(3)), 3000, 30)
+                const oneThird = (balance / BigInt(3))
+                if (oneThird < BigInt(1000000000000000)) {
+                    this.logger.warning(`not taking profits for now due to low balance`)
+                    return
+                } else {
+                    const buyPrice = await this.broker.getBuyPrice(1)
+                    const sellPrice = await this.broker.getSellPrice()
+                    if (buyPrice - (buyPrice*0.09) < sellPrice) {
+                        return this.broker.takeProfits(Helper.UNI, oneThird, 3000, 30)
+                    } else {
+                        this.logger.warning(`no need to take profits atm`)
+                        return
+                    }
+                }
             }            
             case EActions.sellFreedomCash: {
                 const balance = await this.broker.balanceOf()

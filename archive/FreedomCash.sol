@@ -42,7 +42,6 @@ import "https://github.com/Uniswap/v3-core/blob/v1.0.0/contracts/interfaces/IUni
 import "https://github.com/Uniswap/v3-core/blob/v1.0.0/contracts/libraries/FixedPoint96.sol";
 
 contract FreedomCash is ERC20 {
-
     address constant public routerAddress   = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
     address constant public factoryAddress  = 0x1F98431c8aD98523631AE4a59f267346ea31F984;
     address constant public wethAddress     = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
@@ -85,11 +84,9 @@ contract FreedomCash is ERC20 {
     mapping(address => uint256)         public iCIDs;
     mapping(address => uint256)         public pGCIDs;
     mapping(address => uint256)         public gCCIDs;
-
     error SellPriceMightHaveDropped();
     error TransferOfETHFailed();
     error UnreasonableRequest();
-
     constructor() ERC20("Freedom Cash", "FREEDOMCASH") {
         _mint(address(this), 369369369 * 10 ** decimals()); // into contract itself 
     }
@@ -110,6 +107,7 @@ contract FreedomCash is ERC20 {
         if (investmentBudget >= (99 * 10**15)) {
             address winner = getAddressOfHighestSoFar("investmentBet");
             investmentCandidates[iCIDs[winner]].eligibleRounds = investmentCandidates[iCIDs[winner]].eligibleRounds + 1;
+            investmentCandidates[iCIDs[winner]].score = 0; 
         } 
         aCounter = aCounter + 1;
         attestations[aCounter] = Attestation(msg.sender, scAddress, "investmentBet", msg.value, block.timestamp);
@@ -133,7 +131,8 @@ contract FreedomCash is ERC20 {
             (bool sent, ) = winner.call{value: 99 * 10**15}("Congratulations");
             if (sent == false) { revert TransferOfETHFailed(); }
             pubGoodCandidates[pGCIDs[winner]].successes = pubGoodCandidates[pGCIDs[winner]].successes + 1;
-            pubGoodsFundingBudget = pubGoodsFundingBudget - 99 * 10**15;         
+            pubGoodsFundingBudget = pubGoodsFundingBudget - 99 * 10**15;   
+            pubGoodCandidates[pGCIDs[winner]].score = 0;       
         }  
         aCounter = aCounter + 1;
         attestations[aCounter] = Attestation(msg.sender, pubGoodWallet, "publicGoodsFunding", msg.value, block.timestamp);
@@ -159,10 +158,33 @@ contract FreedomCash is ERC20 {
             if (sent == false) { revert TransferOfETHFailed(); }
             geocashingCandidates[gCCIDs[winner]].successes = geocashingCandidates[gCCIDs[winner]].successes + 1;
             geoCashingBudget = geoCashingBudget - 99 * 10**15;     
+            geocashingCandidates[gCCIDs[winner]].score = 0;                   
         }
         aCounter = aCounter + 1;
         attestations[aCounter] = Attestation(msg.sender, geoCashAddress, "geoCashing", msg.value, block.timestamp);              
     }
+    function executeCommunityInvestment(address asset, uint24 poolFee, uint24 maxSlip) public {
+        if (investmentBudget <= (99 * 10**15)) { revert UnreasonableRequest(); }
+        uint256 delta = investmentCandidates[iCIDs[asset]].eligibleRounds - investmentCandidates[iCIDs[asset]].clearedRounds;
+        if (delta == 0) { revert UnreasonableRequest(); }
+        if (delta > 99) { handlePotentialSwapProblems(delta, asset); }
+        uint256 amount = (99 * 10**15) * delta;
+        address poolAddress = getPoolAddress(wethAddress, asset, poolFee);
+        uint256 price = getPriceForInvestment(asset, poolAddress);
+        uint256 amountOutMinimum = getAmountOutMinimum(wethAddress, amount, price, maxSlip);
+        swipSwapV3(wethAddress, asset, amount, poolFee, amountOutMinimum);
+        investmentBudget = investmentBudget - amount;  
+        investmentCandidates[iCIDs[asset]].clearedRounds = investmentCandidates[iCIDs[asset]].eligibleRounds;
+    }   
+    function takeProfits(address asset, uint256 amount, uint24 poolFee, uint24 maxSlip) public {
+        if ((getSellPrice() + (getSellPrice() * 9/100)) > getBuyPrice(10**18)) { revert UnreasonableRequest(); }
+        if(IERC20(asset).balanceOf(address(this)) < amount) { revert UnreasonableRequest(); }
+        address poolAddress = getPoolAddress(asset, wethAddress, poolFee);
+        uint256 price = getPriceForInvestment(wethAddress, poolAddress);
+        uint256 amountOutMinimum = getAmountOutMinimum(asset, amount, price, maxSlip);
+        swipSwapV3(asset, wethAddress, amount, poolFee, amountOutMinimum);
+        reconcileAndClear();
+    }        
     function sellFreedomCash(uint256 amount, uint256 sellPrice) public {
         if (amount > balanceOf(msg.sender)) { revert UnreasonableRequest(); }
         if (getSellPrice() < sellPrice) { revert SellPriceMightHaveDropped(); }
@@ -173,15 +195,6 @@ contract FreedomCash is ERC20 {
         if (sent == false) { revert TransferOfETHFailed(); }
         reconcileAndClear();
     }
-    function takeProfits(address asset, uint256 amount, uint24 poolFee, uint24 maxSlip) public {
-        if ((getSellPrice() + (getSellPrice() * 9/100)) > getBuyPrice(10**18)) { revert UnreasonableRequest(); }
-        if(IERC20(asset).balanceOf(address(this)) < amount) { revert UnreasonableRequest(); }
-        address poolAddress = getPoolAddress(asset, wethAddress, poolFee);
-        uint256 price = getPriceForInvestment(asset, poolAddress);
-        uint256 amountOutMinimum = getAmountOutMinimum(asset, amount, price, maxSlip);
-        swipSwapV3(asset, wethAddress, amount, poolFee, amountOutMinimum);
-        reconcileAndClear();
-    }    
     function getBuyPrice(uint256 amountToBeBought) public view returns(uint256){
         if(amountToBeBought < 9*10**9) { revert UnreasonableRequest(); }
         uint256 underway = totalSupply() - balanceOf(address(this));    
@@ -194,7 +207,7 @@ contract FreedomCash is ERC20 {
         uint256 sellPrice = Math.mulDiv(liquidityBudget, 10**18, underway);
         if (sellPrice > getBuyPrice(10**18)) sellPrice = getBuyPrice(10**18);
         return sellPrice;
-    }
+    }   
     function getAddressOfHighestSoFar(bytes32 gameType) public view returns(address) {
         uint256 highestSoFar = 0;
         address addressOfHighestSoFar;
@@ -223,19 +236,6 @@ contract FreedomCash is ERC20 {
             revert UnreasonableRequest();
         } 
         return addressOfHighestSoFar;
-    }
-    function executeCommunityInvestment(address asset, uint24 poolFee, uint24 maxSlip) public {
-        if (investmentBudget <= (99 * 10**15)) { revert UnreasonableRequest(); }
-        uint256 delta = investmentCandidates[iCIDs[asset]].eligibleRounds - investmentCandidates[iCIDs[asset]].clearedRounds;
-        if (delta == 0) { revert UnreasonableRequest(); }
-        if (delta > 99) { handlePotentialSwapProblems(delta, asset); }
-        uint256 amount = (99 * 10**15) * delta;
-        address poolAddress = getPoolAddress(wethAddress, asset, poolFee);
-        uint256 price = getPriceForInvestment(asset, poolAddress);
-        uint256 amountOutMinimum = getAmountOutMinimum(wethAddress, amount, price, maxSlip);
-        swipSwapV3(wethAddress, asset, amount, poolFee, amountOutMinimum);
-        investmentBudget = investmentBudget - amount;  
-        investmentCandidates[iCIDs[asset]].clearedRounds = investmentCandidates[iCIDs[asset]].clearedRounds + 1;
     }
     function handlePotentialSwapProblems(uint256 iRounds, address swapTroubleAsset) internal {
         investmentBudget = investmentBudget - ((99 * 10**15) * iRounds);  

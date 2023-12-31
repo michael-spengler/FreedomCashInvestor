@@ -67,69 +67,36 @@ export class Broker {
             throw new Error(`investment budget only at ${BigInt(investmentBudget)}`)
         }
         try {
-            const poolAddress = await this.getPoolAddress(asset, Helper.WETH, 3000)
-            const price = await this.getPriceForInvestment(asset, poolAddress)
-            const amountOutMinimum = await this.getAmountOutMinimum(Helper.WETH, BigInt(99 * 10 ** 15), price, maxSlip)
-            this.logger.info(`\ncommunity investing ${BigInt(99 * 10 ** 15).toString()} WETH for ${asset} to receive at least ${amountOutMinimum} ${asset}`)
+            this.logger.info(`\ncommunity investing into ${asset}`)
             const tx = await this.contract.executeCommunityInvestment(asset, poolFee, maxSlip);
             await tx.wait()
         } catch (error) {
             this.logger.error(error.message);
         }
     }
-
-    public async takingProfitsMakesSense(asset: string, amount): Promise<boolean> {
-        this.logger.debug(`contract: ${this.contract}`)
-        if (await this.contract.balanceOf(Helper.FC) === await this.contract.totalSupply()) {
-            this.logger.warning("you can't take profits while the game did not even start :)")
-            return false
-        }
-        const buyPrice = await this.contract.getBuyPrice(Helper.convertToWei(1))
-        const sellPrice = await this.contract.getSellPrice()
-        this.logger.debug(`buyPrice: ${buyPrice} sellPrice: ${sellPrice}`)
-        if ((sellPrice + (sellPrice * (BigInt(9) / BigInt(100)))) <= buyPrice) {
-            this.logger.warning(`getting contract for ${asset}`)
-            const assetContract = await this.helper.getAssetContract(asset)
-            const balance = await assetContract.balanceOf(Helper.FC)
-            this.logger.error(balance)
-            if (balance >= amount) {
-                this.logger.debug(`balance of ${asset} in our contract: ${balance}`)
-                return true;
-            } else {
-                this.logger.warning(`balance of ${asset} in our contract: ${balance} too low to sell ${amount}`)
-                return false;
-            }
-        } else {
-            this.logger.warning(`we would only sell ${asset} if (buyPrice > sellPrice * 1.09)`)
-        }
-        this.logger.warning(`why would you take profits at this time when buyPrice: ${sellPrice} buyPrice: ${sellPrice}`)
-        return false;
-    }
     public async getAssetContract(asset: string) {
         return this.helper.getAssetContract(asset)
     }
     public async takeProfits(asset: string, amount: bigint, poolFee: number, maxSlip: number): Promise<void> {
-        if (await this.takingProfitsMakesSense(asset, amount)) {
-            let decimalsOfAsset = await (await this.helper.getAssetContract(asset)).decimals()
-            const amountInWei = BigInt(amount) * (BigInt(10) ** decimalsOfAsset)
-            console.log(amountInWei.toString())
-            const poolAddress = await this.getPoolAddress(asset, Helper.WETH, 3000)
-            const price = await this.getPriceForInvestment(Helper.WETH, poolAddress)
-            const amountOutMinimum = await this.getAmountOutMinimum(asset, amountInWei, price, maxSlip)
-            this.logger.info(`\ntaking profits selling ${amount} ${asset} (${amountInWei}) at ${price} to receive at least: ${amountOutMinimum} ${Helper.WETH}`)
-            try {
-                const tx = await this.contract.takeProfits(asset, amountInWei, poolFee, maxSlip);
-                await tx.wait()
-            } catch (error) {
-                alert(error.message);
-            }
-        } else {
-            this.logger.warning(`It seems unreasonable to sell ${amount} ${asset} atm.`)
+        let decimalsOfAsset = await (await this.helper.getAssetContract(asset)).decimals()
+        const amountInWei = BigInt(amount) * (BigInt(10) ** decimalsOfAsset)
+        const poolAddress = await this.getPoolAddress(asset, Helper.WETH, 3000)
+        const price = await this.getPriceForInvestment(Helper.WETH, poolAddress)
+        const amountOutMinimum = await this.getAmountOutMinimum(asset, amountInWei, price, maxSlip)
+        this.logger.info(`\ntaking profits selling ${amount} ${asset} (${amountInWei}) at ${price} to receive at least: ${amountOutMinimum} ${Helper.WETH}`)
+        try {
+            const tx = await this.contract.takeProfits(asset, amountInWei, poolFee, maxSlip);
+            await tx.wait()
+        } catch (error) {
+            alert(error.message);
         }
     }
     public async getBuyPrice(amountToBeBought: number): Promise<BigInt> {
         let aToBeBoughtInWei = BigInt(ethers.parseEther(amountToBeBought.toString()));
         return BigInt(await this.contract.getBuyPrice(aToBeBoughtInWei));
+    }
+    public async getSellPrice(): Promise<any> {
+        return this.contract.getSellPrice()
     }
     public async factoryAddress(): Promise<any> {
         return this.contract.factoryAddress()
@@ -214,12 +181,6 @@ export class Broker {
     public async allowance(owner: string, spender: string): Promise<any> {
         return this.contract.allowance(owner, spender)
     }
-    public async buyPrice(amountToBeBought: number): Promise<any> {
-        return this.contract.getBuyPrice(Helper.convertToWei(amountToBeBought))
-    }
-    public async sellPrice(): Promise<any> {
-        return this.contract.getSellPrice()
-    }
     public async logFundamentals(clientInterestedIn: EDataTypes[]): Promise<void> {
 
         if (clientInterestedIn.indexOf(EDataTypes.masterData) > -1) {
@@ -265,9 +226,9 @@ export class Broker {
 
         if (clientInterestedIn.indexOf(EDataTypes.pricingData) > -1) {
             this.logger.info("\n\n*************************** Pricing Data ***************************")
-            this.logger.debug(`buyPrice: ${ethers.formatEther(await this.buyPrice(1))}`)
+            this.logger.debug(`buyPrice: ${ethers.formatEther(await this.getBuyPrice(1))}`)
             try {
-                this.logger.debug(`sellPrice: ${ethers.formatEther(await this.sellPrice())}`)
+                this.logger.debug(`sellPrice: ${ethers.formatEther(await this.getSellPrice())}`)
             } catch (error) {
                 this.logger.warning(`could not determine a sell price atm`)
             }
