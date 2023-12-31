@@ -1,31 +1,44 @@
 import { ethers, Logger } from '../deps.ts';
-import { Helper } from './helper.ts';
 import { EDataTypes, WETH, FC } from './monique-baumann.ts';
 
 export class Broker {
 
     public static instance
 
-    public static async getInstance(): Promise<Broker> {
+    public static async getInstance(logger: Logger, contract: any, provider: any): Promise<Broker> {
         if (Broker.instance === undefined) {
-            const logger = await Helper.getLogger()
-            const helper = await Helper.getInstance()
-            Broker.instance = new Broker(helper, logger)
+
+            Broker.instance = new Broker(logger, contract, provider)
         }
         return Broker.instance
-
     }
 
-    private helper: Helper
+
+    public static getProviderURL(logger: Logger): string {
+        let configuration: any = {}
+        if (Deno.args[0] !== undefined) { // supplying your provider URL via parameter
+            return Deno.args[0]
+        } else { // ... or via .env.json
+            try {
+                configuration = JSON.parse(Deno.readTextFileSync('./.env.json'))
+                return configuration.providerURL
+            } catch (error) {
+                logger.error(error.message)
+                logger.error("without a providerURL I cannot connect to the blockchain")
+            }
+        }
+        throw new Error("could not get a providerURL")
+    }
+
     private provider: any
     private contract: any
     private logger: Logger
 
-    private constructor(helper: Helper, logger: Logger) {
-        this.helper = helper
-        this.provider = this.helper.getProvider()
-        this.contract = this.helper.getContract()
+    private constructor(logger: Logger, contract: any, provider: any) {
+        this.contract = contract
         this.logger = logger
+        this.provider = provider
+
     }
 
     public async voteFor(voteType: string, asset: string, amountToBeBought: number, text?: string): Promise<void> {
@@ -61,6 +74,7 @@ export class Broker {
             this.logger.info(`sc balance after : ${ethers.formatEther(balance)}`)
         }
     }
+
     public async executeCommunityInvestment(asset: string, poolFee: number, maxSlip: number) {
         const investmentBudget = await this.contract.investmentBudget()
         if (investmentBudget < BigInt(99 * 10 ** 15)) {
@@ -74,16 +88,12 @@ export class Broker {
             this.logger.error(error.message);
         }
     }
-    public async getAssetContract(asset: string) {
-        return this.helper.getAssetContract(asset)
-    }
-    public async takeProfits(asset: string, amount: bigint, poolFee: number, maxSlip: number): Promise<void> {
-        let decimalsOfAsset = await (await this.helper.getAssetContract(asset)).decimals()
-        const amountInWei = BigInt(amount) * (BigInt(10) ** decimalsOfAsset)
+
+    public async takeProfits(asset: string, amountInWei: bigint, poolFee: number, maxSlip: number): Promise<void> {
         const poolAddress = await this.getPoolAddress(asset, WETH, 3000)
         const price = await this.getPriceForInvestment(WETH, poolAddress)
         const amountOutMinimum = await this.getAmountOutMinimum(asset, amountInWei, price, maxSlip)
-        this.logger.info(`\ntaking profits selling ${amount} ${asset} (${amountInWei}) at ${price} to receive at least: ${amountOutMinimum} ${WETH}`)
+        this.logger.info(`\ntaking profits selling ${amountInWei} of ${asset} at ${price} to receive at least: ${amountOutMinimum} ${WETH}`)
         try {
             const tx = await this.contract.takeProfits(asset, amountInWei, poolFee, maxSlip);
             await tx.wait()
@@ -91,6 +101,7 @@ export class Broker {
             alert(error.message);
         }
     }
+
     public async getBuyPrice(amountToBeBought: number): Promise<BigInt> {
         let aToBeBoughtInWei = BigInt(ethers.parseEther(amountToBeBought.toString()));
         return BigInt(await this.contract.getBuyPrice(aToBeBoughtInWei));
@@ -101,7 +112,6 @@ export class Broker {
     public async factoryAddress(): Promise<any> {
         return this.contract.factoryAddress()
     }
-
     public async routerAddress(): Promise<any> {
         return this.contract.routerAddress()
     }
@@ -115,7 +125,6 @@ export class Broker {
         return this.contract.wethAddress()
     }
     public async amountOfETHInSmartContract(): Promise<any> {
-        // return ethers.formatEther(this.provider.getBalance(FC).toString())
         return this.provider.getBalance(FC)
     }
     public async balanceOf(): Promise<any> {

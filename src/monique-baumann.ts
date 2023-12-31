@@ -1,6 +1,5 @@
 import { sleep, Logger, ethers } from "../deps.ts"
 import { Broker } from "./broker.ts"
-import { Helper } from "./helper.ts"
 import { Bollinger } from "./bollinger.ts"
 
 export enum EMode {
@@ -27,7 +26,7 @@ export enum EDataTypes {
     operationalData
 }
 
-interface IActionsCounters{
+interface IActionsCounters {
     action: EActions,
     count: number
 }
@@ -38,12 +37,22 @@ export class MoniqueBaumann {
 
     public static async getInstance(interestedIn: EDataTypes[]): Promise<void> {
         if (MoniqueBaumann.instance === undefined) {
-            const logger = await Helper.getLogger()
-            const helper = await Helper.getInstance()
-            const broker = await Broker.getInstance()
-            MoniqueBaumann.instance = new MoniqueBaumann(broker, logger, interestedIn)
+            const minLevelForConsole = 'DEBUG'
+            const minLevelForFile = 'WARNING'
+            const fileName = "./warnings-errors.txt"
+            const pureInfo = true // leaving out e.g. the time info
+            const logger = await Logger.getInstance(minLevelForConsole, minLevelForFile, fileName, pureInfo)
+            const provider = new ethers.JsonRpcProvider(Broker.getProviderURL(logger))
+            const contract = await MoniqueBaumann.getContract(FC, provider)
+            const broker = await Broker.getInstance(logger, contract, provider)
+            MoniqueBaumann.instance = new MoniqueBaumann(broker, logger, provider, contract, interestedIn)
         }
         return MoniqueBaumann.instance
+    }
+
+    public static async getContract(asset: string, provider: any): Promise<any> {
+        const abi = JSON.parse(Deno.readTextFileSync('./freedomcash-abi.json'))
+        return new ethers.Contract(asset, abi, await provider.getSigner())
     }
 
     private readonly freedomCashRocks = true
@@ -51,15 +60,19 @@ export class MoniqueBaumann {
     private roundIsActive = false
     private broker: Broker
     private logger: Logger
+    private provider: any
+    private contract: any
     private bollinger: Bollinger
     private interestedIn: EDataTypes[] = []
     private executedActionsCounters: IActionsCounters[] = []
 
-    private constructor(broker: Broker, logger: Logger, interestedIn: EDataTypes[]) {
+    private constructor(broker: Broker, logger: Logger, provider: any, contract: any, interestedIn: EDataTypes[]) {
         this.logger = logger
         this.broker = broker
         this.bollinger = new Bollinger(27, logger)
-        this.interestedIn= interestedIn
+        this.interestedIn = interestedIn
+        this.provider = provider
+        this.contract = contract
     }
 
     public async play(sleepTime: number, minHistoryLength: number, spreadFactor: number, action: EActions, mode: EMode) {
@@ -119,7 +132,7 @@ export class MoniqueBaumann {
     private countActions(action: EActions) {
         const executedActionCounter = this.executedActionsCounters.filter((e => e.action === action))[0]
         if (executedActionCounter === undefined) {
-            this.executedActionsCounters.push({action: action, count: 1})
+            this.executedActionsCounters.push({ action: action, count: 1 })
         } else {
             executedActionCounter.count = executedActionCounter.count + 1
         }
@@ -151,22 +164,24 @@ export class MoniqueBaumann {
                 }
             }
             case EActions.takeProfits: {
-                const balance = await (await await this.broker.getAssetContract(UNI)).balanceOf(FC)
+                const balance = await this.contract.balanceOf(FC)
+                let decimalsOfAsset = await (await MoniqueBaumann.getContract(UNI, this.provider)).decimals()
                 const oneThird = (balance / BigInt(3))
+                const amountInWei = BigInt(oneThird) * (BigInt(10) ** decimalsOfAsset)
                 if (oneThird < BigInt(1000000000000000)) {
                     this.logger.warning(`not taking profits for now due to low balance`)
                     return
                 } else {
                     const buyPrice = await this.broker.getBuyPrice(1)
                     const sellPrice = await this.broker.getSellPrice()
-                    if (buyPrice - (buyPrice*0.09) < sellPrice) {
+                    if (buyPrice - (buyPrice * 0.09) < sellPrice) {
                         return this.broker.takeProfits(UNI, oneThird, 3000, 30)
                     } else {
                         this.logger.warning(`no need to take profits atm`)
                         return
                     }
                 }
-            }            
+            }
             case EActions.sellFreedomCash: {
                 const balance = await this.broker.balanceOf()
                 return this.broker.sellFreedomCash(999)
