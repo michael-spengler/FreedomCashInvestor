@@ -170,6 +170,7 @@ export class MoniqueBaumann {
                 }
             }
             case EActions.sellFreedomCash: {
+                const balance = await this.broker.balanceOf()
                 return this.broker.sellFreedomCash(999)
             }
             default: throw new Error(`unknown action: ${action} (typeOfAction ${typeof (action)})`)
