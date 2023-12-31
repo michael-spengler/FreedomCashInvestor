@@ -1,17 +1,7 @@
 import { ethers, Logger } from '../deps.ts';
+import { FC } from './monique-baumann.ts';
 
 export class Helper {
-
-    public static readonly FC = "0xdB8042acaEa8d5656aDE8126c250789bfc023639"
-    public static readonly ROUTER = "0xE592427A0AEce92De3Edee1F18E0157C05861564"
-    public static readonly CULT = "0xf0f9D895aCa5c8678f706FB8216fa22957685A13"
-    public static readonly POD = "0xE90CE7764d8401d19ed3733a211bd3b06c631Bc0"
-    public static readonly SHIB = "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE"
-    public static readonly OPDonations = "0x2D1bEB3e41D90d7F9756e92c3061265206a661A2"
-    public static readonly WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
-    public static readonly UNI = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984"
-    public static readonly VITALIK = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
-    public static readonly CENTRALIZEDFRAUD = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
 
     public static instance: Helper
     public static logger: Logger
@@ -23,10 +13,6 @@ export class Helper {
             await Helper.instance.initializeContract()
         }
         return Helper.instance
-    }
-
-    public static convertToWei(amount: number): BigInt {
-        return ethers.parseEther(amount.toString())
     }
 
     public static async getLogger(): Promise<Logger> {
@@ -65,7 +51,7 @@ export class Helper {
     }
 
     public async initializeContract() {
-        this.contract = new ethers.Contract(Helper.FC, this.getFreedomCashABI(), await this.provider.getSigner())
+        this.contract = new ethers.Contract(FC, this.getFreedomCashABI(), await this.provider.getSigner())
         // const testWallet = new ethers.Wallet(pkTestWallet, this.provider);
         // this.contract = new ethers.Contract(Helper.FC, this.getFreedomCashABI(), testWallet);
 

@@ -1,4 +1,4 @@
-import { sleep, Logger } from "../deps.ts"
+import { sleep, Logger, ethers } from "../deps.ts"
 import { Broker } from "./broker.ts"
 import { Helper } from "./helper.ts"
 import { Bollinger } from "./bollinger.ts"
@@ -52,16 +52,14 @@ export class MoniqueBaumann {
     private broker: Broker
     private logger: Logger
     private bollinger: Bollinger
-    private checker: Checker
     private interestedIn: EDataTypes[] = []
     private executedActionsCounters: IActionsCounters[] = []
 
-    private constructor(broker: Broker, logger: Logger, checker: Checker, interestedIn: EDataTypes[]) {
+    private constructor(broker: Broker, logger: Logger, interestedIn: EDataTypes[]) {
         this.logger = logger
         this.broker = broker
         this.bollinger = new Bollinger(27, logger)
         this.interestedIn= interestedIn
-        this.checker = checker
     }
 
     public async play(sleepTime: number, minHistoryLength: number, spreadFactor: number, action: EActions, mode: EMode) {
@@ -101,7 +99,7 @@ export class MoniqueBaumann {
         await this.broker.logFundamentals()
         let price: number
         if (mode === EMode.bollingerReal) {
-            price = await this.broker.getBuyPrice(Helper.convertToWei(1))
+            price = await this.broker.getBuyPrice(ethers.parseEther("1"))
         } else {
             price = Math.round((Math.random() * (81 - 9) + 9))
         }
@@ -133,27 +131,27 @@ export class MoniqueBaumann {
 
         switch (action) {
             case EActions.voteForInvestment: {
-                return this.broker.voteFor("investmentBet", Helper.UNI, 9)
+                return this.broker.voteFor("investmentBet", UNI, 9)
             }
             case EActions.voteForPublicGood: {
-                return this.broker.voteFor("publicGoodsFunding", Helper.OPDonations, 999)
+                return this.broker.voteFor("publicGoodsFunding", OPDonations, 999)
             }
             case EActions.voteForGeoCash: {
-                return this.broker.voteFor("geoCashing", Helper.VITALIK, 999, "geil")
+                return this.broker.voteFor("geoCashing", VITALIK, 999, "geil")
             }
             case EActions.executeCommunityInvestment: {
-                const id = await this.broker.iCIDAt(Helper.UNI)
+                const id = await this.broker.iCIDAt(UNI)
                 const candidate = await this.broker.investmentCandidatesAt(id)
                 const delta = candidate[1] - candidate[2]
                 if (delta > BigInt(0)) {
-                    return this.broker.executeCommunityInvestment(Helper.UNI, 3000, 70)
+                    return this.broker.executeCommunityInvestment(UNI, 3000, 70)
                 } else {
                     this.logger.warning(`makes no sense atm because delta: ${delta}`)
                     return
                 }
             }
             case EActions.takeProfits: {
-                const balance = await (await await this.broker.getAssetContract(Helper.UNI)).balanceOf(Helper.FC)
+                const balance = await (await await this.broker.getAssetContract(UNI)).balanceOf(FC)
                 const oneThird = (balance / BigInt(3))
                 if (oneThird < BigInt(1000000000000000)) {
                     this.logger.warning(`not taking profits for now due to low balance`)
@@ -162,7 +160,7 @@ export class MoniqueBaumann {
                     const buyPrice = await this.broker.getBuyPrice(1)
                     const sellPrice = await this.broker.getSellPrice()
                     if (buyPrice - (buyPrice*0.09) < sellPrice) {
-                        return this.broker.takeProfits(Helper.UNI, oneThird, 3000, 30)
+                        return this.broker.takeProfits(UNI, oneThird, 3000, 30)
                     } else {
                         this.logger.warning(`no need to take profits atm`)
                         return
@@ -186,3 +184,16 @@ export class MoniqueBaumann {
         // see example implementation in https://github.com/monique-baumann/FreedomCash/tree/main/deno/Monique.ts
     }
 }
+
+export const FC = "0xdB8042acaEa8d5656aDE8126c250789bfc023639"
+export const ROUTER = "0xE592427A0AEce92De3Edee1F18E0157C05861564"
+export const CULT = "0xf0f9D895aCa5c8678f706FB8216fa22957685A13"
+export const POD = "0xE90CE7764d8401d19ed3733a211bd3b06c631Bc0"
+export const SHIB = "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE"
+export const OPDonations = "0x2D1bEB3e41D90d7F9756e92c3061265206a661A2"
+export const VITALIK = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+export const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+export const UNI = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984"
+export const CENTRALIZEDFRAUD = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+
+
