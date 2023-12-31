@@ -88,9 +88,11 @@ export class Broker {
         const sellPrice = await this.contract.getSellPrice()
         this.logger.debug(`buyPrice: ${buyPrice} sellPrice: ${sellPrice}`)
         if ((sellPrice + (sellPrice * (BigInt(9) / BigInt(100)))) <= buyPrice) {
+            this.logger.warning(`getting contract for ${asset}`)
             const assetContract = await this.helper.getAssetContract(asset)
             const balance = await assetContract.balanceOf(Helper.FC)
-            if (balance >= Helper.convertToWei(amount)) {
+            this.logger.error(balance)
+            if (balance >= amount) {
                 this.logger.debug(`balance of ${asset} in our contract: ${balance}`)
                 return true;
             } else {
@@ -100,17 +102,21 @@ export class Broker {
         } else {
             this.logger.warning(`we would only sell ${asset} if (buyPrice > sellPrice * 1.09)`)
         }
+        this.logger.warning(`why would you take profits at this time when buyPrice: ${sellPrice} buyPrice: ${sellPrice}`)
         return false;
     }
-    public async takeProfits(asset: string, amount: number, poolFee: number, maxSlip: number): Promise<void> {
+    public async getAssetContract(asset: string) {
+        return this.helper.getAssetContract(asset)
+    }
+    public async takeProfits(asset: string, amount: bigint, poolFee: number, maxSlip: number): Promise<void> {
         if (await this.takingProfitsMakesSense(asset, amount)) {
             let decimalsOfAsset = await (await this.helper.getAssetContract(asset)).decimals()
-            const amountInWei = BigInt(amount) * BigInt(10) ** decimalsOfAsset
+            const amountInWei = BigInt(amount) * (BigInt(10) ** decimalsOfAsset)
             console.log(amountInWei.toString())
             const poolAddress = await this.getPoolAddress(asset, Helper.WETH, 3000)
             const price = await this.getPriceForInvestment(Helper.WETH, poolAddress)
             const amountOutMinimum = await this.getAmountOutMinimum(asset, amountInWei, price, maxSlip)
-            this.logger.info(`\ntaking profits by selling ${amount} ${asset} (${amountInWei}) to receive at least: ${amountOutMinimum} ${Helper.WETH}`)
+            this.logger.info(`\ntaking profits selling ${amount} ${asset} (${amountInWei}) at ${price} to receive at least: ${amountOutMinimum} ${Helper.WETH}`)
             try {
                 const tx = await this.contract.takeProfits(asset, amountInWei, poolFee, maxSlip);
                 await tx.wait()
@@ -120,33 +126,6 @@ export class Broker {
         } else {
             this.logger.warning(`It seems unreasonable to sell ${amount} ${asset} atm.`)
         }
-    }
-    public async swipSwapV3Service(tIn: string, tOut: string, amount: number, poolFee: number, maxSlip: number): Promise<void> {
-        const amountInWei = Helper.convertToWei(amount)
-        const poolAddress = await this.getPoolAddress(tIn, tOut, 3000)
-        const investmentPriceForAsset = await this.getPriceForInvestment(tOut, poolAddress)
-        const amountOutMinimum = await this.getAmountOutMinimum(Helper.WETH, amountInWei, investmentPriceForAsset, 30)
-        this.logger.info(`\nusing the SwipSwapV3Service to swap ${amount} ${tIn} to ${tOut} with minimum output ${amountOutMinimum}, poolFee: ${poolFee}, maxSlip: ${maxSlip}`)
-        try {
-            const tx = await this.contract.swipSwapV3Service(tIn, tOut, poolFee, amountOutMinimum, { value: amountInWei });
-            await tx.wait()
-        } catch (error) {
-            this.logger.error(error.message);
-        }
-
-        // const gasPrice = (await this.provider.getGasPrice()) * 9;
-
-    }
-    public async sendETHWithMessage(target: string, message: string, amount: number): Promise<void> {
-        const encodedMessage = ethers.encodeBytes32String(message)
-        const amountInWei = Helper.convertToWei(amount)
-        this.logger.info(`\nsending ${amount} ETH (${amountInWei} WEI) with Message: ${message}`)
-        let balance = await this.provider.getBalance(Helper.FC)
-        this.logger.debug(`sc balance before: ${ethers.formatEther(balance)}`)
-        const tx = await this.contract.sendETHWithMessage(target, encodedMessage, { value: BigInt(amountInWei) })
-        await tx.wait()
-        balance = await this.provider.getBalance(Helper.FC)
-        this.logger.debug(`sc balance after: ${ethers.formatEther(balance)}`)
     }
     public async getBuyPrice(amountToBeBought: number): Promise<BigInt> {
         let aToBeBoughtInWei = BigInt(ethers.parseEther(amountToBeBought.toString()));

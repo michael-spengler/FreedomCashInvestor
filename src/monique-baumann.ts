@@ -17,9 +17,7 @@ export enum EActions {
     voteForGeoCash = "Vote for GeoCash",
     executeCommunityInvestment = "Execute Community Investment",
     takeProfits = "Take Profits",
-    sellFreedomCash = "Sell Freedom Cash",
-    swipSwapV3Service = "Utilize the swip swap service",
-    sendETHWithMessage = "Send Ether with Message",
+    sellFreedomCash = "Sell Freedom Cash"
 }
 
 export enum EDataTypes {
@@ -91,7 +89,7 @@ export class MoniqueBaumann {
             }
         } else if (minHistoryLength === 0 && spreadFactor === 0) {
             if (mode === EMode.actionRandom) {
-                const index = Math.round((Math.random() * ((8 - 1) - 0) + 0))
+                const index = Math.round((Math.random() * ((6 - 1) - 0) + 0))
                 const randomAction = Object.values(EActions)[index]
                 await this.execute(randomAction)
             } else if (mode === EMode.actionSpecific) {
@@ -129,7 +127,7 @@ export class MoniqueBaumann {
         } else {
             executedActionCounter.count = executedActionCounter.count + 1
         }
-        this.logger.info(JSON.stringify(this.executedActionsCounters))
+        this.logger.info(this.executedActionsCounters)
     }
     private async execute(action: EActions): Promise<void> {
         await this.checker.checkConsistency()
@@ -146,18 +144,9 @@ export class MoniqueBaumann {
             case EActions.voteForGeoCash: {
                 return this.broker.voteFor("geoCashing", Helper.VITALIK, 999, "geil")
             }
-            case EActions.sendETHWithMessage: {
-                return this.broker.sendETHWithMessage(Helper.VITALIK, "Hello Free World", 0.000009)
-            }
-            case EActions.swipSwapV3Service: {
-                return this.broker.swipSwapV3Service(Helper.WETH, Helper.UNI, 0.009, 3000, 30)
-            }
-            case EActions.takeProfits: {
-                return this.broker.takeProfits(Helper.UNI, 1, 3000, 70)
-            }
             case EActions.executeCommunityInvestment: {
-                const highestSoFar = await this.broker.addressOfHighestSoFarInvestment()
-                const id = await this.broker.iCIDAt(highestSoFar)
+                // const highestSoFar = await this.broker.addressOfHighestSoFarInvestment()
+                const id = await this.broker.iCIDAt(Helper.UNI)
                 const candidate = await this.broker.investmentCandidatesAt(id)
                 console.log(candidate)
                 console.log(typeof(candidate))
@@ -169,6 +158,12 @@ export class MoniqueBaumann {
                     return
                 }
             }
+            case EActions.takeProfits: {
+                const balance = await (await await this.broker.getAssetContract(Helper.UNI)).balanceOf(Helper.FC)
+                this.logger.error(balance)
+
+                return this.broker.takeProfits(Helper.UNI, (balance / BigInt(3)), 3000, 30)
+            }            
             case EActions.sellFreedomCash: {
                 const balance = await this.broker.balanceOf()
                 return this.broker.sellFreedomCash(999)

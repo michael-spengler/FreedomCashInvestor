@@ -28,16 +28,28 @@ export class Checker {
     }
 
     public async checkConsistency(): Promise<void> {
-        await this.checkReasonableAmountOutETHIN()
-        await this.checkReasonableAmountOutUNIIN()
+        // await this.checkReasonableAmountOutETHIN()
+        // await this.checkReasonableAmountOutUNIIN()
+        await this.checkBalances()
     }
 
+    private async checkBalances() {
+        const assetContract = await this.helper.getAssetContract(Helper.UNI)
+        // console.log(assetContract)
+
+        const balance = await assetContract.balanceOf(Helper.FC)
+        this.logger.info(`${Helper.UNI} balance of ${Helper.FC}: ${balance}`)
+    }
     private async checkReasonableAmountOutETHIN() {
         const asset = Helper.UNI
         const poolAddress = await this.broker.getPoolAddress(Helper.WETH, asset, 3000)
+        this.logger.debug(`\npoolAddress: ${poolAddress}`)
         const investmentPriceForAsset = await this.broker.getPriceForInvestment(asset, poolAddress)
+        this.logger.debug(`investment price for ${asset}: ${investmentPriceForAsset}`)
         const hypotheticalO = this.calculateAmountOutMinimum(BigInt(10 ** 18), investmentPriceForAsset, BigInt(18))
+        this.logger.debug(`hypotheticalO: ${hypotheticalO}`)
         const amountOutMinimum = await this.broker.getAmountOutMinimum(Helper.WETH, BigInt(10 ** 18), investmentPriceForAsset, 30)
+        this.logger.debug(`amountOutMinimum: ${amountOutMinimum}`)
         if (hypotheticalO < amountOutMinimum) {
             throw new Error(`amountOutMinimum: ${amountOutMinimum} hypotheticalO: ${hypotheticalO}`)
         }
@@ -53,10 +65,13 @@ export class Checker {
         const asset = Helper.WETH
         const poolAddress = await this.broker.getPoolAddress(Helper.UNI, asset, 3000)
         const investmentPriceForAsset = await this.broker.getPriceForInvestment(asset, poolAddress)
+        this.logger.debug(`investment price for ${asset}: ${ethers.formatEther(investmentPriceForAsset)}`)
         const amountOutMinimum = await this.broker.getAmountOutMinimum(Helper.WETH, BigInt(10 ** 18), investmentPriceForAsset, 30)
         const hypotheticalO = this.calculateAmountOutMinimum(BigInt(10 ** 18), investmentPriceForAsset, BigInt(18))
+        this.logger.debug(`hypotheticalO: ${hypotheticalO}`)
         if (hypotheticalO < amountOutMinimum) {
             throw new Error(`amountOutMinimum: ${amountOutMinimum} hypotheticalO: ${hypotheticalO}`)
         }
+        this.logger.debug(`amountOutMinimum: ${amountOutMinimum}`)
     }
 }

@@ -52,7 +52,7 @@ contract FreedomCash is ERC20 {
     uint256 public aCounter                 = 0;    
     uint256 public investmentBudget         = 0;
     uint256 public liquidityBudget          = 0;
-    uint256 public pubGoodsFundingBudget = 0;
+    uint256 public pubGoodsFundingBudget    = 0;
     uint256 public geoCashingBudget         = 0;    
     struct ICandidateInfo {
         address cAddress;
@@ -101,8 +101,7 @@ contract FreedomCash is ERC20 {
             investmentCandidates[iCCounter] = candi;
         }
         uint256 vPower = msg.value + balanceOf(msg.sender);
-        investmentCandidates[iCIDs[scAddress]].score = 
-            investmentCandidates[iCIDs[scAddress]].score + vPower;
+        investmentCandidates[iCIDs[scAddress]].score = investmentCandidates[iCIDs[scAddress]].score + vPower;
         uint256 check = Math.mulDiv(msg.value, 10**18, fCBuyPrice); 
         if (check != fCAmount) { revert UnreasonableRequest(); }
         this.transfer(msg.sender, fCAmount);
@@ -143,7 +142,7 @@ contract FreedomCash is ERC20 {
         if (gCCIDs[geoCashAddress] == 0) { // new candidate
             gCCCounter = gCCCounter + 1;
             gCCIDs[geoCashAddress] = gCCCounter;
-            GCCandidateInfo memory candi = GCCandidateInfo(geoCashAddress, text,0, 0);
+            GCCandidateInfo memory candi = GCCandidateInfo(geoCashAddress, text, 0, 0);
             geocashingCandidates[gCCCounter] = candi;
         } 
         uint256 vPower = msg.value + balanceOf(msg.sender);        
@@ -240,11 +239,11 @@ contract FreedomCash is ERC20 {
     }
     function handlePotentialSwapProblems(uint256 iRounds, address swapTroubleAsset) internal {
         investmentBudget = investmentBudget - ((99 * 10**15) * iRounds);  
-        reconcileAndClear(); // making the best out of swap troubles 
+        reconcileAndClear(); // making the best out of potential swap troubles 
         investmentCandidates[iCIDs[swapTroubleAsset]].clearedRounds  = investmentCandidates[iCIDs[swapTroubleAsset]].eligibleRounds;
     }    
     function getAmountOutMinimum(address tIn, uint256 aIn, uint256 price, uint24 maxSlip) public view returns(uint256) {
-        uint256 output = (aIn * 10**ERC20(tIn).decimals())  / price;
+        uint256 output = (aIn * 10**ERC20(tIn).decimals()) / price;
         return output - ((output * maxSlip) / 1000);
     }
     function getPoolAddress(address t1, address t2, uint24 fee) public view returns(address) {
@@ -261,64 +260,20 @@ contract FreedomCash is ERC20 {
             return Math.mulDiv(amount0, 10**18, amount1);
         }
     }    
-    function getSqrtPriceX96(address poolAddress) public view returns(uint256) {
-        IUniswapV3Pool pool = IUniswapV3Pool(poolAddress);
-        (uint160 sqrtPriceX96, , , , , , ) = pool.slot0();
-        return sqrtPriceX96;
-    }
-    function getToken0(address poolAddress) public view returns(address) {
-        IUniswapV3Pool pool = IUniswapV3Pool(poolAddress);
-        return pool.token0();
-    }
-    function getToken1(address poolAddress) public view returns(address) {
-        IUniswapV3Pool pool = IUniswapV3Pool(poolAddress);
-        return pool.token1();
-    }    
     function swipSwapV3(address tIn, address tOut,uint256 aIn, uint24 poolFee, uint256 amountOutMinimum) internal {
         ISwapRouter swapRouter = ISwapRouter(routerAddress);
         if (IERC20(tIn).allowance(address(this), address(routerAddress)) < aIn) {
             IERC20(tIn).approve(address(routerAddress), IERC20(tIn).balanceOf(address(this)));
         }
         ISwapRouter.ExactInputSingleParams memory params =
-            ISwapRouter.ExactInputSingleParams({
-                tokenIn: tIn,
-                tokenOut: tOut,
-                fee: poolFee,
-                recipient: address(this),
-                deadline: block.timestamp,
-                amountIn: aIn,
-                amountOutMinimum: amountOutMinimum, 
+            ISwapRouter.ExactInputSingleParams({tokenIn: tIn,tokenOut: tOut,fee: poolFee,recipient: address(this),
+                deadline: block.timestamp,amountIn: aIn,amountOutMinimum: amountOutMinimum, 
                 sqrtPriceLimitX96: 0 // not needed because amountOutMinimum avoids exploits
             });
         swapRouter.exactInputSingle{value: aIn}(params);
         reconcileAndClear(); 
     }    
-    function swipSwapV3Service(address tIn, address tOut,uint24 poolFee, uint256 amountOutMinimum) public payable {
-        ISwapRouter swapRouter = ISwapRouter(routerAddress);
-        if (IERC20(tIn).allowance(address(this), address(routerAddress)) < msg.value) {
-            IERC20(tIn).approve(address(routerAddress), msg.value);
-        }
-        ISwapRouter.ExactInputSingleParams memory params =
-            ISwapRouter.ExactInputSingleParams({
-                tokenIn: tIn,
-                tokenOut: tOut,
-                fee: poolFee,
-                recipient: msg.sender,
-                deadline: block.timestamp,
-                amountIn: Math.mulDiv(msg.value, 991, 1000), // 99.1 percent to swap - 0.9 percent to the Freedom Cash Liquidity Budget
-                amountOutMinimum: amountOutMinimum, 
-                sqrtPriceLimitX96: 0 // not needed because amountOutMinimum avoids exploits
-            });
-        swapRouter.exactInputSingle{value: msg.value}(params);
-        reconcileAndClear();        
-    } 
     function reconcileAndClear() internal {
         liquidityBudget = address(this).balance - investmentBudget - geoCashingBudget - pubGoodsFundingBudget;
-    }
-    function sendETHWithMessage(address payable target, bytes memory message) public payable {
-        uint256 amount = Math.mulDiv(msg.value, 991, 1000); // send 99.1 percent - add 0.9 percent go to Freedom Cash Liquidity Budget
-        (bool sent, ) = target.call{value: amount}(message);
-        if (sent == false) { revert TransferOfETHFailed(); }
-        reconcileAndClear();
     }
 }
