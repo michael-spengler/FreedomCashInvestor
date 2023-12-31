@@ -13,7 +13,7 @@ export class Broker {
             Broker.instance = new Broker(helper, logger)
         }
         return Broker.instance
-        
+
     }
 
     private helper: Helper
@@ -51,7 +51,7 @@ export class Broker {
     public async sellFreedomCash(amount: number): Promise<void> {
         this.logger.info("\nselling Freedom Cash")
         let balance = await this.contract.balanceOf(Helper.FC)
-        if (balance === await this.contract.totalSupply()){
+        if (balance === await this.contract.totalSupply()) {
             this.logger.warning("the game did not even start")
         } else {
             this.logger.debug(`sc balance before: ${ethers.formatEther(balance)}`)
@@ -67,10 +67,12 @@ export class Broker {
             throw new Error(`investment budget only at ${BigInt(investmentBudget)}`)
         }
         try {
-            const amountOutMinimum = await this.getAmountOutMinimum(Helper.WETH, asset, BigInt(99 * 10 ** 15), poolFee, maxSlip)
+            const poolAddress = await this.getPoolAddress(asset, Helper.WETH, 3000)
+            const price = await this.getPriceForInvestment(asset, poolAddress)
+            const amountOutMinimum = await this.getAmountOutMinimum(Helper.WETH, BigInt(99 * 10 ** 15), price, maxSlip)
             this.logger.info(`\ncommunity investing ${BigInt(99 * 10 ** 15).toString()} WETH for ${asset} to receive at least ${amountOutMinimum} ${asset}`)
-            let result = await this.contract.executeCommunityInvestment(asset, poolFee, maxSlip);
-            this.logger.debug(`result: ${result}`);
+            const tx = await this.contract.executeCommunityInvestment(asset, poolFee, maxSlip);
+            await tx.wait()
         } catch (error) {
             this.logger.error(error.message);
         }
@@ -81,7 +83,7 @@ export class Broker {
         if (await this.contract.balanceOf(Helper.FC) === await this.contract.totalSupply()) {
             this.logger.warning("you can't take profits while the game did not even start :)")
             return false
-        } 
+        }
         const buyPrice = await this.contract.getBuyPrice(Helper.convertToWei(1))
         const sellPrice = await this.contract.getSellPrice()
         this.logger.debug(`buyPrice: ${buyPrice} sellPrice: ${sellPrice}`)
@@ -103,12 +105,15 @@ export class Broker {
     public async takeProfits(asset: string, amount: number, poolFee: number, maxSlip: number): Promise<void> {
         if (await this.takingProfitsMakesSense(asset, amount)) {
             let decimalsOfAsset = await (await this.helper.getAssetContract(asset)).decimals()
-            const amountInWei = BigInt(amount) * BigInt(10)**decimalsOfAsset
+            const amountInWei = BigInt(amount) * BigInt(10) ** decimalsOfAsset
             console.log(amountInWei.toString())
-            const amountOutMinimum = await this.getAmountOutMinimum(asset, Helper.WETH, amountInWei, poolFee, maxSlip)
+            const poolAddress = await this.getPoolAddress(asset, Helper.WETH, 3000)
+            const price = await this.getPriceForInvestment(Helper.WETH, poolAddress)
+            const amountOutMinimum = await this.getAmountOutMinimum(asset, amountInWei, price, maxSlip)
             this.logger.info(`\ntaking profits by selling ${amount} ${asset} (${amountInWei}) to receive at least: ${amountOutMinimum} ${Helper.WETH}`)
             try {
-                await this.contract.takeProfits(asset, amountInWei, poolFee, maxSlip);
+                const tx = await this.contract.takeProfits(asset, amountInWei, poolFee, maxSlip);
+                await tx.wait()
             } catch (error) {
                 alert(error.message);
             }
@@ -119,11 +124,12 @@ export class Broker {
     public async swipSwapV3Service(tIn: string, tOut: string, amount: number, poolFee: number, maxSlip: number): Promise<void> {
         const amountInWei = Helper.convertToWei(amount)
         const poolAddress = await this.getPoolAddress(tIn, tOut, 3000)
-        const investmentPriceForAsset = await this.getInvestmentPriceForAsset(tOut, poolAddress)
+        const investmentPriceForAsset = await this.getPriceForInvestment(tOut, poolAddress)
         const amountOutMinimum = await this.getAmountOutMinimum(Helper.WETH, amountInWei, investmentPriceForAsset, 30)
         this.logger.info(`\nusing the SwipSwapV3Service to swap ${amount} ${tIn} to ${tOut} with minimum output ${amountOutMinimum}, poolFee: ${poolFee}, maxSlip: ${maxSlip}`)
         try {
-            let result = await this.contract.swipSwapV3Service(tIn, tOut, poolFee, amountOutMinimum, { value: amountInWei });
+            const tx = await this.contract.swipSwapV3Service(tIn, tOut, poolFee, amountOutMinimum, { value: amountInWei });
+            await tx.wait()
         } catch (error) {
             this.logger.error(error.message);
         }
@@ -149,7 +155,7 @@ export class Broker {
     public async factoryAddress(): Promise<any> {
         return this.contract.factoryAddress()
     }
- 
+
     public async routerAddress(): Promise<any> {
         return this.contract.routerAddress()
     }
@@ -193,8 +199,8 @@ export class Broker {
     public async getPoolAddress(tIn: string, tOut: string, poolFee: number): Promise<any> {
         return this.contract.getPoolAddress(tIn, tOut, poolFee)
     }
-    public async getInvestmentPriceForAsset(asset: string, poolAddress: string): Promise<any> {
-        return this.contract.getInvestmentPriceForAsset(asset, poolAddress)
+    public async getPriceForInvestment(asset: string, poolAddress: string): Promise<any> {
+        return this.contract.getPriceForInvestment(asset, poolAddress)
     }
     public async getAmountOutMinimum(tIn: string, amount: bigint, price: bigint, maxSlip: number): Promise<any> {
         return this.contract.getAmountOutMinimum(tIn, amount, price, maxSlip)
@@ -276,14 +282,14 @@ export class Broker {
             this.logger.debug(`iCIDsAtFC: ${await this.iCIDAt(Helper.FC)}`)
             this.logger.debug(`pGCIDsAtOPDonations: ${await this.pGCIDAt(Helper.FC)}`)
             this.logger.debug(`gCCIDsAtVitalik: ${await this.gCCIDAt(Helper.FC)}`)
-                }
+        }
 
         if (clientInterestedIn.indexOf(EDataTypes.pricingData) > -1) {
             this.logger.info("\n\n*************************** Pricing Data ***************************")
             this.logger.debug(`buyPrice: ${ethers.formatEther(await this.buyPrice(1))}`)
             try {
                 this.logger.debug(`sellPrice: ${ethers.formatEther(await this.sellPrice())}`)
-            } catch(error) {
+            } catch (error) {
                 this.logger.warning(`could not determine a sell price atm`)
             }
         }

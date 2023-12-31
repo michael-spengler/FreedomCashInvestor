@@ -30,6 +30,11 @@ export enum EDataTypes {
     operationalData
 }
 
+interface IActionsCounters{
+    action: EActions,
+    count: number
+}
+
 export class MoniqueBaumann {
 
     public static instance
@@ -52,8 +57,8 @@ export class MoniqueBaumann {
     private logger: Logger
     private bollinger: Bollinger
     private checker: Checker
-
     private interestedIn: EDataTypes[] = []
+    private executedActionsCounters: IActionsCounters[] = []
 
     private constructor(broker: Broker, logger: Logger, checker: Checker, interestedIn: EDataTypes[]) {
         this.logger = logger
@@ -117,9 +122,20 @@ export class MoniqueBaumann {
         }
         return
     }
+    private countActions(action: EActions) {
+        const executedActionCounter = this.executedActionsCounters.filter((e => e.action === action))[0]
+        if (executedActionCounter === undefined) {
+            this.executedActionsCounters.push({action: action, count: 1})
+        } else {
+            executedActionCounter.count = executedActionCounter.count + 1
+        }
+        this.logger.info(JSON.stringify(this.executedActionsCounters))
+    }
     private async execute(action: EActions): Promise<void> {
-        this.logger.info(action)
         await this.checker.checkConsistency()
+
+        this.countActions(action)
+
         switch (action) {
             case EActions.voteForInvestment: {
                 return this.broker.voteFor("investmentBet", Helper.UNI, 9999)
@@ -140,13 +156,25 @@ export class MoniqueBaumann {
                 return this.broker.takeProfits(Helper.UNI, 1, 3000, 70)
             }
             case EActions.executeCommunityInvestment: {
-                return this.broker.executeCommunityInvestment(Helper.UNI, 3000, 70)
+                const highestSoFar = await this.broker.addressOfHighestSoFarInvestment()
+                const id = await this.broker.iCIDAt(highestSoFar)
+                const candidate = await this.broker.investmentCandidatesAt(id)
+                console.log(candidate)
+                console.log(typeof(candidate))
+                const delta = candidate[1] - candidate[2]
+                if (delta > BigInt(0)) {
+                    return this.broker.executeCommunityInvestment(Helper.UNI, 3000, 70)
+                } else {
+                    this.logger.warning(`makes no sense atm because delta: ${delta}`)
+                    return
+                }
             }
             case EActions.sellFreedomCash: {
                 return this.broker.sellFreedomCash(999)
             }
             default: throw new Error(`unknown action: ${action} (typeOfAction ${typeof (action)})`)
         }
+
     }
 
     protected async buy(): Promise<void> {

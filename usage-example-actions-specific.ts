@@ -5,7 +5,7 @@ import { EDataTypes, Broker, MoniqueBaumann, Helper, EMode, EActions } from "./m
 
 const interestedIn: EDataTypes[] = []
 
-// interestedIn.push(EDataTypes.budgetData)
+interestedIn.push(EDataTypes.budgetData)
 interestedIn.push(EDataTypes.gamingData)
 // interestedIn.push(EDataTypes.pricingData)
 // interestedIn.push(EDataTypes.masterData)
@@ -16,6 +16,6 @@ const moniqueBaumann = await MoniqueBaumann.getInstance(interestedIn)
 const sleepTime = 9
 const minHistoryLength = 0
 const spreadFactor = 0
-const specificAction = EActions.swipSwapV3Service
+const specificAction = EActions.executeCommunityInvestment
 const mode = EMode.actionSpecific
 await moniqueBaumann.play(sleepTime, minHistoryLength, spreadFactor, specificAction, mode)

@@ -62,13 +62,13 @@ contract FreedomCash is ERC20 {
     }
     struct PGCandidateInfo {
         address cAddress;
-        uint256 eligibleRounds;
+        uint256 successes;
         uint256 score;
     }    
     struct GCCandidateInfo {
         address cAddress;
         string text;
-        uint256 eligibleRounds;   
+        uint256 successes;   
         uint256 score;
     }
     struct Attestation { // Will be integrated with EAS via Freedom Enterprise
@@ -109,7 +109,7 @@ contract FreedomCash is ERC20 {
         investmentBudget = investmentBudget + Math.mulDiv(msg.value, 33, 100); 
         reconcileAndClear(); 
         if (investmentBudget >= (99 * 10**15)) {
-            address winner = getAddressOfHighestSoFar("publicGoodsFunding");
+            address winner = getAddressOfHighestSoFar("investmentBet");
             investmentCandidates[iCIDs[winner]].eligibleRounds = investmentCandidates[iCIDs[winner]].eligibleRounds + 1;
         } 
         aCounter = aCounter + 1;
@@ -133,7 +133,7 @@ contract FreedomCash is ERC20 {
             address winner = getAddressOfHighestSoFar("publicGoodsFunding");
             (bool sent, ) = winner.call{value: 99 * 10**15}("Congratulations");
             if (sent == false) { revert TransferOfETHFailed(); }
-            pubGoodCandidates[pGCIDs[winner]].eligibleRounds = pubGoodCandidates[pGCIDs[winner]].eligibleRounds + 1;
+            pubGoodCandidates[pGCIDs[winner]].successes = pubGoodCandidates[pGCIDs[winner]].successes + 1;
             pubGoodsFundingBudget = pubGoodsFundingBudget - 99 * 10**15;         
         }  
         aCounter = aCounter + 1;
@@ -158,7 +158,7 @@ contract FreedomCash is ERC20 {
             address winner = getAddressOfHighestSoFar("geoCashing");
             (bool sent, ) = winner.call{value: 99 * 10**15}("Congratulations");
             if (sent == false) { revert TransferOfETHFailed(); }
-            geocashingCandidates[gCCIDs[winner]].eligibleRounds = geocashingCandidates[gCCIDs[winner]].eligibleRounds + 1;
+            geocashingCandidates[gCCIDs[winner]].successes = geocashingCandidates[gCCIDs[winner]].successes + 1;
             geoCashingBudget = geoCashingBudget - 99 * 10**15;     
         }
         aCounter = aCounter + 1;
@@ -178,7 +178,7 @@ contract FreedomCash is ERC20 {
         if ((getSellPrice() + (getSellPrice() * 9/100)) > getBuyPrice(10**18)) { revert UnreasonableRequest(); }
         if(IERC20(asset).balanceOf(address(this)) < amount) { revert UnreasonableRequest(); }
         address poolAddress = getPoolAddress(asset, wethAddress, poolFee);
-        uint256 price = getInvestmentPriceForAsset(asset, poolAddress);
+        uint256 price = getPriceForInvestment(asset, poolAddress);
         uint256 amountOutMinimum = getAmountOutMinimum(asset, amount, price, maxSlip);
         swipSwapV3(asset, wethAddress, amount, poolFee, amountOutMinimum);
         reconcileAndClear();
@@ -232,7 +232,7 @@ contract FreedomCash is ERC20 {
         if (delta > 99) { handlePotentialSwapProblems(delta, asset); }
         uint256 amount = (99 * 10**15) * delta;
         address poolAddress = getPoolAddress(wethAddress, asset, poolFee);
-        uint256 price = getInvestmentPriceForAsset(asset, poolAddress);
+        uint256 price = getPriceForInvestment(asset, poolAddress);
         uint256 amountOutMinimum = getAmountOutMinimum(wethAddress, amount, price, maxSlip);
         swipSwapV3(wethAddress, asset, amount, poolFee, amountOutMinimum);
         investmentBudget = investmentBudget - amount;  
@@ -250,7 +250,7 @@ contract FreedomCash is ERC20 {
     function getPoolAddress(address t1, address t2, uint24 fee) public view returns(address) {
         return IUniswapV3Factory(factoryAddress).getPool(t1, t2, fee);
     }
-    function getInvestmentPriceForAsset(address asset, address poolAddress) public view returns(uint256) {
+    function getPriceForInvestment(address asset, address poolAddress) public view returns(uint256) {
         IUniswapV3Pool pool = IUniswapV3Pool(poolAddress);
         (uint160 sqrtPriceX96, , , , , , ) = pool.slot0();
         uint256 amount0 = (10**ERC20(pool.token1()).decimals()) * Math.mulDiv(pool.liquidity(), FixedPoint96.Q96, sqrtPriceX96);

@@ -16,7 +16,7 @@ export class Checker {
         return Checker.instance
 
     }
-    
+
     private broker: Broker
     private logger: Logger
     private helper: Helper
@@ -35,36 +35,28 @@ export class Checker {
     private async checkReasonableAmountOutETHIN() {
         const asset = Helper.UNI
         const poolAddress = await this.broker.getPoolAddress(Helper.WETH, asset, 3000)
-        this.logger.debug(`\npoolAddress: ${poolAddress}`)
-        const investmentPriceForAsset = await this.broker.getInvestmentPriceForAsset(asset, poolAddress)
-        this.logger.debug(`investment price for ${asset}: ${investmentPriceForAsset}`)
-        const hypotheticalO = this.calculateAmountOutMinimum(BigInt(10**18), investmentPriceForAsset, BigInt(18))
-        this.logger.debug(`hypotheticalO: ${hypotheticalO}`)
-        const amountOutMinimum = await this.broker.getAmountOutMinimum(Helper.WETH, BigInt(10**18), investmentPriceForAsset, 30)
-        this.logger.debug(`amountOutMinimum: ${amountOutMinimum}`)
-        if (hypotheticalO < amountOutMinimum){
+        const investmentPriceForAsset = await this.broker.getPriceForInvestment(asset, poolAddress)
+        const hypotheticalO = this.calculateAmountOutMinimum(BigInt(10 ** 18), investmentPriceForAsset, BigInt(18))
+        const amountOutMinimum = await this.broker.getAmountOutMinimum(Helper.WETH, BigInt(10 ** 18), investmentPriceForAsset, 30)
+        if (hypotheticalO < amountOutMinimum) {
             throw new Error(`amountOutMinimum: ${amountOutMinimum} hypotheticalO: ${hypotheticalO}`)
         }
     }
     private calculateAmountOutMinimum(amountIn: bigint, price: bigint, decimals: bigint) {
         try {
-            return amountIn * (BigInt(10)**decimals) / price
-        } catch(error){
+            return amountIn * (BigInt(10) ** decimals) / price
+        } catch (error) {
             this.logger.warning(error.message)
         }
     }
     private async checkReasonableAmountOutUNIIN() {
         const asset = Helper.WETH
         const poolAddress = await this.broker.getPoolAddress(Helper.UNI, asset, 3000)
-        this.logger.debug(`\npoolAddress: ${poolAddress}`)
-        const investmentPriceForAsset = await this.broker.getInvestmentPriceForAsset(asset, poolAddress)
-        this.logger.debug(`investment price for ${asset}: ${ethers.formatEther(investmentPriceForAsset)}`)
-        const amountOutMinimum = await this.broker.getAmountOutMinimum(Helper.WETH, BigInt(10**18), investmentPriceForAsset, 30)
-        const hypotheticalO = this.calculateAmountOutMinimum(BigInt(10**18), investmentPriceForAsset, BigInt(18))
-        this.logger.debug(`hypotheticalO: ${hypotheticalO}`)
-        if (hypotheticalO < amountOutMinimum){
+        const investmentPriceForAsset = await this.broker.getPriceForInvestment(asset, poolAddress)
+        const amountOutMinimum = await this.broker.getAmountOutMinimum(Helper.WETH, BigInt(10 ** 18), investmentPriceForAsset, 30)
+        const hypotheticalO = this.calculateAmountOutMinimum(BigInt(10 ** 18), investmentPriceForAsset, BigInt(18))
+        if (hypotheticalO < amountOutMinimum) {
             throw new Error(`amountOutMinimum: ${amountOutMinimum} hypotheticalO: ${hypotheticalO}`)
         }
-        this.logger.debug(`amountOutMinimum: ${amountOutMinimum}`)
     }
 }
