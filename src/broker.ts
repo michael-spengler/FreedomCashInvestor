@@ -118,8 +118,9 @@ export class Broker {
     }
     public async swipSwapV3Service(tIn: string, tOut: string, amount: number, poolFee: number, maxSlip: number): Promise<void> {
         const amountInWei = Helper.convertToWei(amount)
-        const amountOutMinimum =
-            await this.getAmountOutMinimum(Helper.WETH, Helper.UNI, amountInWei, poolFee, maxSlip)
+        const poolAddress = await this.getPoolAddress(tIn, tOut, 3000)
+        const investmentPriceForAsset = await this.getInvestmentPriceForAsset(tOut, poolAddress)
+        const amountOutMinimum = await this.getAmountOutMinimum(Helper.WETH, amountInWei, investmentPriceForAsset, 30)
         this.logger.info(`\nusing the SwipSwapV3Service to swap ${amount} ${tIn} to ${tOut} with minimum output ${amountOutMinimum}, poolFee: ${poolFee}, maxSlip: ${maxSlip}`)
         try {
             let result = await this.contract.swipSwapV3Service(tIn, tOut, poolFee, amountOutMinimum, { value: amountInWei });
@@ -213,8 +214,8 @@ export class Broker {
     public async investmentCandidatesAt(index: number): Promise<any> {
         return this.contract.investmentCandidates(index)
     }
-    public async publicGoodCandidatesAt(index: number): Promise<any> {
-        return this.contract.publicGoodCandidates(index)
+    public async pubGoodCandidatesAt(index: number): Promise<any> {
+        return this.contract.pubGoodCandidates(index)
     }
     public async iCIDAt(address: string): Promise<any> {
         return this.contract.iCIDs(address)
@@ -262,7 +263,7 @@ export class Broker {
             this.logger.debug(`addressOfHighestSoFarPublicGood: ${await this.addressOfHighestSoFarPublicGood()}`)
             this.logger.debug(`addressOfHighestSoFarGeoCash: ${await this.addressOfHighestSoFarGeoCash()}`)
             this.logger.debug(`investmentCandidatesAt1: ${await this.investmentCandidatesAt(1)}`)
-            this.logger.debug(`publicGoodCandidatesAt1: ${await this.publicGoodCandidatesAt(1)}`)
+            this.logger.debug(`pubGoodCandidatesAt1: ${await this.pubGoodCandidatesAt(1)}`)
             this.logger.debug(`geoCashingCandidatesAt1: ${await this.geoCashingCandidatesAt(1)}`)
 
         }

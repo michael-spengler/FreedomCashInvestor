@@ -47,7 +47,11 @@ export class Checker {
         }
     }
     private calculateAmountOutMinimum(amountIn: bigint, price: bigint, decimals: bigint) {
-        return amountIn * (BigInt(10)**decimals) / price
+        try {
+            return amountIn * (BigInt(10)**decimals) / price
+        } catch(error){
+            this.logger.warning(error.message)
+        }
     }
     private async checkReasonableAmountOutUNIIN() {
         const asset = Helper.WETH
@@ -56,11 +60,11 @@ export class Checker {
         const investmentPriceForAsset = await this.broker.getInvestmentPriceForAsset(asset, poolAddress)
         this.logger.debug(`investment price for ${asset}: ${ethers.formatEther(investmentPriceForAsset)}`)
         const amountOutMinimum = await this.broker.getAmountOutMinimum(Helper.WETH, BigInt(10**18), investmentPriceForAsset, 30)
-        this.logger.debug(`amountOutMinimum: ${ethers.formatEther(amountOutMinimum)}`)
         const hypotheticalO = this.calculateAmountOutMinimum(BigInt(10**18), investmentPriceForAsset, BigInt(18))
         this.logger.debug(`hypotheticalO: ${hypotheticalO}`)
         if (hypotheticalO < amountOutMinimum){
             throw new Error(`amountOutMinimum: ${amountOutMinimum} hypotheticalO: ${hypotheticalO}`)
         }
+        this.logger.debug(`amountOutMinimum: ${amountOutMinimum}`)
     }
 }

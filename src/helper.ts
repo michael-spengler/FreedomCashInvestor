@@ -13,11 +13,11 @@ export class Helper {
     public static readonly VITALIK = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
 
     public static instance: Helper
+    public static logger: Logger
 
     public static async getInstance(): Promise<Helper> {
         if (Helper.instance == undefined) {
-            const logger = await Helper.getLogger()
-            const providerURL = await Helper.getProviderURL(logger)
+            const providerURL = await Helper.getProviderURL(Helper.logger)
             Helper.instance = new Helper(providerURL)
             await Helper.instance.initializeContract()
         }
@@ -29,11 +29,14 @@ export class Helper {
     }
 
     public static async getLogger(): Promise<Logger> {
-        const minLevelForConsole = 'DEBUG'
-        const minLevelForFile = 'WARNING'
-        const fileName = "./warnings-errors.txt"
-        const pureInfo = true // leaving out e.g. the time info
-        return Logger.getInstance(minLevelForConsole, minLevelForFile, fileName, pureInfo)
+        if (Helper.logger === undefined) {
+            const minLevelForConsole = 'DEBUG'
+            const minLevelForFile = 'WARNING'
+            const fileName = "./warnings-errors.txt"
+            const pureInfo = true // leaving out e.g. the time info
+            Helper.logger = Logger.getInstance(minLevelForConsole, minLevelForFile, fileName, pureInfo)
+        } 
+        return Helper.logger
     }
 
     public static getProviderURL(logger: Logger): string {
