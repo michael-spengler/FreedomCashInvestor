@@ -2,6 +2,7 @@ import { sleep, Logger } from "../deps.ts"
 import { Broker } from "./broker.ts"
 import { Helper } from "./helper.ts"
 import { Bollinger } from "./bollinger.ts"
+import { Checker } from "./checker.ts"
 
 export enum EMode {
     actionRandom,
@@ -31,19 +32,35 @@ export enum EDataTypes {
 
 export class MoniqueBaumann {
 
+    public static instance
+
+    public static async getInstance(interestedIn: EDataTypes[]): Promise<void> {
+        if (MoniqueBaumann.instance === undefined) {
+            const logger = await Logger.getInstance()
+            const helper = await Helper.getInstance()
+            const broker = await Broker.getInstance()
+            const checker = await Checker.getInstance()
+            MoniqueBaumann.instance = new MoniqueBaumann(broker, logger, checker, interestedIn)
+        }
+        return MoniqueBaumann.instance
+    }
+
     private readonly freedomCashRocks = true
     private partyIsOn = false
     private roundIsActive = false
     private broker: Broker
     private logger: Logger
     private bollinger: Bollinger
+    private checker: Checker
+
     private interestedIn: EDataTypes[] = []
 
-    public constructor(broker: Broker, logger: Logger, interestedIn: EDataTypes[]) {
+    private constructor(broker: Broker, logger: Logger, checker: Checker, interestedIn: EDataTypes[]) {
         this.logger = logger
         this.broker = broker
         this.bollinger = new Bollinger(27, logger)
         this.interestedIn= interestedIn
+        this.checker = checker
     }
 
     public async play(sleepTime: number, minHistoryLength: number, spreadFactor: number, action: EActions, mode: EMode) {
@@ -102,6 +119,7 @@ export class MoniqueBaumann {
     }
     private async execute(action: EActions): Promise<void> {
         this.logger.info(action)
+        await this.checker.checkConsistency()
         switch (action) {
             case EActions.voteForInvestment: {
                 return this.broker.voteFor("investmentBet", Helper.UNI, 9999)
