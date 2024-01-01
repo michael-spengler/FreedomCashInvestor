@@ -1,6 +1,6 @@
 import { ethers, Logger } from "../deps.ts"
 
-export const FC = "0x0ddeDBa6b0995880381979A925607A99ab7Edd87"
+export const FC = "0x23363Be2f95b397854dd77F6a79CD27Fa46B7e75"
 export const ROUTER = "0xE592427A0AEce92De3Edee1F18E0157C05861564"
 export const CULT = "0xf0f9D895aCa5c8678f706FB8216fa22957685A13"
 export const POD = "0xE90CE7764d8401d19ed3733a211bd3b06c631Bc0"

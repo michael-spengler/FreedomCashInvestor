@@ -176,7 +176,7 @@ contract FreedomCash is ERC20 {
     }     
     function takeProfits(address asset, uint256 amount, uint24 poolFee, uint24 maxSlip) public {
         if ((getSellPrice() + (getSellPrice() * 9/100)) > getBuyPrice(10**18)) { revert UnreasonableRequest(); }
-        if(IERC20(asset).balanceOf(address(this)) < amount) { revert UnreasonableRequest(); }
+        if(asset == address(this) || IERC20(asset).balanceOf(address(this)) < amount) { revert UnreasonableRequest(); }
         address poolAddress = getPoolAddress(asset, wethAddress, poolFee);
         uint256 price = getPriceForInvestment(wethAddress, poolAddress);
         uint256 amountOutMinimum = getAmountOutMinimum(wethAddress, amount, price, maxSlip);
