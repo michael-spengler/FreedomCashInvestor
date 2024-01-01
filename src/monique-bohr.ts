@@ -40,4 +40,7 @@ export class MoniqueBohr extends MoniqueBaumann {
         await super.execute(action)
         await this.broker.logFundamentals(this.interestedIn, FC)
     }
+    public async checkConsistency() {
+        
+    }
 }

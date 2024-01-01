@@ -1,6 +1,7 @@
 import { sleep, Logger, ethers } from "../deps.ts"
 import { Broker } from "./broker.ts"
 import { Bollinger } from "./bollinger.ts"
+import { getContract } from "./constants-types-infrastructure.ts"
 
 export enum EMode {
     actionRandom,
@@ -44,7 +45,7 @@ export class MoniqueBaumann {
             const pureInfo = true // leaving out e.g. the time info
             const logger = await Logger.getInstance(minLevelForConsole, minLevelForFile, fileName, pureInfo)
             const provider = new ethers.JsonRpcProvider(Broker.getProviderURL(logger))
-            const contract = await MoniqueBaumann.getContract(FC, provider)
+            const contract = await getContract(FC, provider)
             const broker = await Broker.getInstance(logger, contract, provider)
             MoniqueBaumann.instance = new MoniqueBaumann(broker, logger, provider, contract, interestedIn)
         }
@@ -171,7 +172,7 @@ export class MoniqueBaumann {
                 return
             }
             case EActions.takeProfits: {
-                const investmentContract = await MoniqueBaumann.getContract(UNI, this.provider)
+                const investmentContract = await getContract(UNI, this.provider)
                 const balance = await investmentContract.balanceOf(FC)
                 let decimalsOfAsset = await investmentContract.decimals()
                 const oneThird = (balance / BigInt(3))

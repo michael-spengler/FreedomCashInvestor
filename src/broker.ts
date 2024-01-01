@@ -1,5 +1,5 @@
 import { ethers, Logger } from '../deps.ts';
-import { EDataTypes, CENTRALIZEDFRAUD, WETH } from './constants-types-infrastructure.ts';
+import { EDataTypes } from './constants-types-infrastructure.ts';
 
 export class Broker {
 
@@ -59,11 +59,6 @@ export class Broker {
             throw new Error(`investment budget only at ${BigInt(investmentBudget)}`)
         }
         try {
-            const poolAddress = await this.getPoolAddress(WETH, CENTRALIZEDFRAUD, 3000)
-            const price = await this.getPriceForInvestment(CENTRALIZEDFRAUD, poolAddress)
-            const amountOutMinimum = await this.getAmountOutMinimum(CENTRALIZEDFRAUD, BigInt(99 * 10 ** 15), price, maxSlip)
-            const formattedPrice = ethers.formatEther(price)
-            this.logger.info(`\ncommunity investing ${BigInt(99 * 10 ** 15)} ${WETH} into ${asset} at a price of ${price} (${formattedPrice}) to receive at least ${amountOutMinimum} via pool ${poolAddress} ${poolFee} ${maxSlip}`)
             this.logger.info(`\ncalling contract with ${asset} ${poolFee} ${maxSlip}`)
             return this.contract.executeCommunityInvestment(asset, poolFee, maxSlip);
         } catch (error) {
@@ -98,12 +93,12 @@ export class Broker {
 
         if (clientInterestedIn.indexOf(EDataTypes.budgetData) > -1) {
             this.logger.info("\n\n*************************** Budget Data ***************************")
-            this.logger.debug(`amountOfETHInSmartContract: ${ethers.formatEther(await this.amountOfETHInSmartContract(scAddress))}`)
-            this.logger.debug(`balanceOf Smart Contract: ${ethers.formatEther(await this.balanceOf(scAddress))}`)
             this.logger.debug(`investmentBudget: ${ethers.formatEther(await this.investmentBudget())}`)
             this.logger.debug(`pubGoodsFundingBudget: ${ethers.formatEther(await this.pubGoodsFundingBudget())}`)
             this.logger.debug(`geoCashingBudget: ${ethers.formatEther(await this.geoCashingBudget())}`)
             this.logger.debug(`liquidityBudget: ${ethers.formatEther(await this.liquidityBudget())}`)
+            this.logger.debug(`balanceOf Smart Contract: ${ethers.formatEther(await this.balanceOf(scAddress))}`)
+            this.logger.debug(`amountOfETHInSmartContract: ${ethers.formatEther(await this.amountOfETHInSmartContract(scAddress))}`)
         }
 
         if (clientInterestedIn.indexOf(EDataTypes.attestations) > -1) {

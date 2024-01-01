@@ -76,7 +76,7 @@ export class MoniqueBaumann {
         let transaction: any
         switch (action) {
             case EActions.voteForInvestment: {
-                transaction = await this.broker.voteFor("investmentBet", CENTRALIZEDFRAUD, 9999)
+                transaction = await this.broker.voteFor("investmentBet", UNI, 999)
                 break
             }
             case EActions.voteForPublicGood: {
@@ -88,15 +88,12 @@ export class MoniqueBaumann {
                 break
             }
             case EActions.executeCommunityInvestment: {
-                const investment = CENTRALIZEDFRAUD
+                const investment = UNI
                 const id = await this.broker.iCIDAt(investment)
                 const candidate = await this.broker.investmentCandidatesAt(id)
                 const poolAddress = await this.broker.getPoolAddress(WETH, investment, 3000)
                 const price = await this.broker.getPriceForInvestment(investment, poolAddress)
-                const amountOutMinimum = await this.broker.getAmountOutMinimum(WETH, BigInt(99 * 10 ** 15), price, 120)
-                const investmentBudget = await this.broker.investmentBudget()
                 const delta = candidate[1] - candidate[2]
-                this.logger.warning(`investmentBudget: ${investmentBudget} price: ${price} amountOutMinimum: ${amountOutMinimum} delta: ${delta}`)
                 if (delta > BigInt(0)) {
                     transaction = await this.broker.executeCommunityInvestment(investment, 3000, 120)
                     break
@@ -107,7 +104,7 @@ export class MoniqueBaumann {
                 return
             }
             case EActions.takeProfits: {
-                const investment = CENTRALIZEDFRAUD
+                const investment = UNI
                 const investmentContract = await getContract(investment, this.provider)
                 const balance = await investmentContract.balanceOf(FC)
                 let decimalsOfAsset = await investmentContract.decimals()
@@ -129,8 +126,11 @@ export class MoniqueBaumann {
                 }
             }
             case EActions.sellFreedomCash: {
-                const balance = await this.broker.balanceOf()
-                transaction = await this.broker.sellFreedomCash(999)
+                let balance = await this.broker.balanceOf(FC)
+                this.logger.warning(`balance before selling: ${balance}`)
+                transaction = await this.broker.sellFreedomCash(BigInt(369369369000000000000000000) - balance)
+                balance = await this.broker.balanceOf(FC)
+                this.logger.warning(`balance after selling:  ${balance}`)
                 break
             }
             default: throw new Error(`unknown action: ${action} (typeOfAction ${typeof (action)})`)

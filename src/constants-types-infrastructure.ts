@@ -1,6 +1,6 @@
 import { ethers, Logger } from "../deps.ts"
 
-export const FC = "0x43e84c14b63Ea47123f4BB01a2Cee2BF162721C4"
+export const FC = "0x009533DeC74d1b4becb83673C8C89A1b1F977783"
 export const ROUTER = "0xE592427A0AEce92De3Edee1F18E0157C05861564"
 export const CULT = "0xf0f9D895aCa5c8678f706FB8216fa22957685A13"
 export const POD = "0xE90CE7764d8401d19ed3733a211bd3b06c631Bc0"
@@ -39,6 +39,9 @@ export interface IActionsCounters {
 
 export async function getContract(asset: string, provider: any): Promise<any> {
     const abi = JSON.parse(Deno.readTextFileSync('./freedomcash-abi.json'))
+    const configuration = JSON.parse(Deno.readTextFileSync('./.env.json'))
+    // const wallet = new ethers.Wallet(configuration.pkTestWallet, provider)
+    // return new ethers.Contract(asset, abi, wallet)
     return new ethers.Contract(asset, abi, await provider.getSigner())
 }
 

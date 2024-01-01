@@ -377,3 +377,26 @@ WARNING Mon Jan 01 2024 01:15:24 GMT+0100 (Central European Standard Time) inves
 WARNING Mon Jan 01 2024 13:46:00 GMT+0100 (Central European Standard Time) investmentBudget: 2969406029700000000 price: 3184893777141588 amountOutMinimum: 27354130497309513055 delta: 4
 WARNING Mon Jan 01 2024 15:11:16 GMT+0100 (Central European Standard Time) investmentBudget: 1781643617820000000 price: 436378604847550 amountOutMinimum: 199643151685760575899 delta: 3
 WARNING Mon Jan 01 2024 15:54:03 GMT+0100 (Central European Standard Time) investmentBudget: 2672406029700000000 price: 436380029708993 amountOutMinimum: 199642499813974908392 delta: 1
+WARNING Mon Jan 01 2024 16:00:45 GMT+0100 (Central European Standard Time) investmentBudget: 4058109044550000000 price: 3185222383434999 amountOutMinimum: 27351308484165643313 delta: 0
+WARNING Mon Jan 01 2024 16:00:45 GMT+0100 (Central European Standard Time) makes no sense atm because delta: 0
+WARNING Mon Jan 01 2024 16:01:10 GMT+0100 (Central European Standard Time) not taking profits for now due to low balance
+WARNING Mon Jan 01 2024 16:14:46 GMT+0100 (Central European Standard Time) balance before: 369369369000000000000000000
+WARNING Mon Jan 01 2024 16:14:47 GMT+0100 (Central European Standard Time) liquidityBudget before: 0
+WARNING Mon Jan 01 2024 16:14:48 GMT+0100 (Central European Standard Time) investmentBudget before: 0
+WARNING Mon Jan 01 2024 16:14:56 GMT+0100 (Central European Standard Time) balance after: 369368370000000000000000000
+WARNING Mon Jan 01 2024 16:14:57 GMT+0100 (Central European Standard Time) liquidityBudget after: 6017946030000000
+WARNING Mon Jan 01 2024 16:14:58 GMT+0100 (Central European Standard Time) investmentBudget after: 2964062970000000
+WARNING Mon Jan 01 2024 16:16:14 GMT+0100 (Central European Standard Time) makes no sense atm because delta: 0
+WARNING Mon Jan 01 2024 16:17:01 GMT+0100 (Central European Standard Time) makes no sense atm because delta: 0
+WARNING Mon Jan 01 2024 16:17:13 GMT+0100 (Central European Standard Time) balance before: 369368370000000000000000000
+WARNING Mon Jan 01 2024 16:17:14 GMT+0100 (Central European Standard Time) liquidityBudget before: 6017946030000000
+WARNING Mon Jan 01 2024 16:17:15 GMT+0100 (Central European Standard Time) investmentBudget before: 2964062970000000
+WARNING Mon Jan 01 2024 16:17:23 GMT+0100 (Central European Standard Time) balance after: 369358371000000000000000000
+WARNING Mon Jan 01 2024 16:17:24 GMT+0100 (Central European Standard Time) liquidityBudget after:  669131028090000000
+WARNING Mon Jan 01 2024 16:17:25 GMT+0100 (Central European Standard Time) investmentBudget after: 329571998910000000
+WARNING Mon Jan 01 2024 16:18:34 GMT+0100 (Central European Standard Time) balance before: 369358371000000000000000000
+WARNING Mon Jan 01 2024 16:18:36 GMT+0100 (Central European Standard Time) liquidityBudget before: 570131028090000000
+WARNING Mon Jan 01 2024 16:18:37 GMT+0100 (Central European Standard Time) investmentBudget before: 230571998910000000
+WARNING Mon Jan 01 2024 16:18:45 GMT+0100 (Central European Standard Time) balance after: 369348372000000000000000000
+WARNING Mon Jan 01 2024 16:18:46 GMT+0100 (Central European Standard Time) liquidityBudget after:  1935123516180000000
+WARNING Mon Jan 01 2024 16:18:48 GMT+0100 (Central European Standard Time) investmentBudget after: 854120537820000000
