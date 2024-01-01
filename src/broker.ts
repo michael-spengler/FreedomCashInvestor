@@ -25,7 +25,6 @@ export class Broker {
         this.provider = provider
 
     }
-
     public async voteFor(voteType: string, asset: string, amountToBeBought: number, text?: string) {
         this.logger.info(`\nvoting for ${voteType} for asset ${asset} with amountToBeBought ${amountToBeBought}`)
         const amountInWei = ethers.parseEther(amountToBeBought.toString())

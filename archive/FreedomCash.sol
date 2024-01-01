@@ -52,18 +52,18 @@ contract FreedomCash is ERC20 {
     uint256 public pubGoodsFundingBudget    = 0;
     uint256 public geoCashingBudget         = 0;    
     struct ICandidateInfo {
-        address cAddress;
+        address payable cAddress;
         uint256 eligibleRounds;
         uint256 clearedRounds;
         uint256 score;
     }
     struct PGCandidateInfo {
-        address cAddress;
+        address payable cAddress;
         uint256 successes;
         uint256 score;
     }    
     struct GCCandidateInfo {
-        address cAddress;
+        address payable cAddress;
         string text;
         uint256 successes;   
         uint256 score;
@@ -88,7 +88,7 @@ contract FreedomCash is ERC20 {
     constructor() ERC20("Freedom Cash", "FREEDOMCASH") {
         _mint(address(this), 369369369 * 10 ** decimals()); // into contract itself 
     }
-    function voteForInvestmentIn(address scAddress, uint256 fCBuyPrice, uint256 fCAmount) public payable {
+    function voteForInvestmentIn(address payable scAddress, uint256 fCBuyPrice, uint256 fCAmount) public payable {
         if (iCIDs[scAddress] == 0) { // new candidate
             iCCounter = iCCounter + 1;
             iCIDs[scAddress] = iCCounter;
@@ -110,7 +110,7 @@ contract FreedomCash is ERC20 {
         aCounter = aCounter + 1;
         attestations[aCounter] = Attestation(msg.sender, scAddress, "investmentBet", msg.value, block.timestamp);
     }
-    function voteForPublicGood(address pubGoodWallet, uint256 fCBuyPrice, uint256 fCAmount) public payable {
+    function voteForPublicGood(address payable pubGoodWallet, uint256 fCBuyPrice, uint256 fCAmount) public payable {
         if (pGCIDs[pubGoodWallet] == 0) { // new candidate
             pGCCounter = pGCCounter + 1;
             pGCIDs[pubGoodWallet] = pGCCounter;
@@ -135,7 +135,7 @@ contract FreedomCash is ERC20 {
         aCounter = aCounter + 1;
         attestations[aCounter] = Attestation(msg.sender, pubGoodWallet, "publicGoodsFunding", msg.value, block.timestamp);
     }
-    function voteForGeoCash(address geoCashAddress, string memory text, uint256 fCBuyPrice, uint256 fCAmount) public payable {
+    function voteForGeoCash(address payable geoCashAddress, string memory text, uint256 fCBuyPrice, uint256 fCAmount) public payable {
         if (gCCIDs[geoCashAddress] == 0) { // new candidate
             gCCCounter = gCCCounter + 1;
             gCCIDs[geoCashAddress] = gCCCounter;
@@ -151,7 +151,7 @@ contract FreedomCash is ERC20 {
         geoCashingBudget = geoCashingBudget + Math.mulDiv(msg.value, 33, 100);
         reconcileAndClear();   
         if(geoCashingBudget >= (99 * 10**15)){
-            address winner = getAddressOfHighestSoFar("geoCashing");
+            address payable winner = getAddressOfHighestSoFar("geoCashing");
             (bool sent, ) = winner.call{value: 99 * 10**15}("Congratulations");
             if (sent == false) { revert TransferOfETHFailed(); }
             geocashingCandidates[gCCIDs[winner]].successes = geocashingCandidates[gCCIDs[winner]].successes + 1;
@@ -206,9 +206,9 @@ contract FreedomCash is ERC20 {
         if (sellPrice > getBuyPrice(10**18)) sellPrice = getBuyPrice(10**18);
         return sellPrice;
     }   
-    function getAddressOfHighestSoFar(bytes32 gameType) public view returns(address) {
+    function getAddressOfHighestSoFar(bytes32 gameType) public view returns(address payable) {
         uint256 highestSoFar = 0;
-        address addressOfHighestSoFar;
+        address payable addressOfHighestSoFar;
         if (gameType == "investmentBet") {
             for (uint256 i = 1; i <= iCCounter; i++) {
                 if(investmentCandidates[i].score > highestSoFar) {
@@ -258,7 +258,7 @@ contract FreedomCash is ERC20 {
             return Math.mulDiv(amount0, 10**18, amount1);
         }
     }    
-    function swipSwapV3(address tIn, address tOut,uint256 aIn, uint24 poolFee, uint256 amountOutMinimum) public {
+    function swipSwapV3(address tIn, address tOut,uint256 aIn, uint24 poolFee, uint256 amountOutMinimum) internal {
         ISwapRouter swapRouter = ISwapRouter(routerAddress);
         if (IERC20(tIn).allowance(address(this), address(routerAddress)) < aIn) {
             IERC20(tIn).approve(address(routerAddress), IERC20(tIn).balanceOf(address(this)));

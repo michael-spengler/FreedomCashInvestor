@@ -2,6 +2,7 @@ import { sleep, Logger, ethers } from "../deps.ts"
 import { Broker } from "./broker.ts"
 import { Bollinger } from "./bollinger.ts"
 import { getProviderURL, getContract, EDataTypes, IActionsCounters, EActions, EMode, FC, WETH, UNI, OPDonations, VITALIK, CENTRALIZEDFRAUD } from "./constants-types-infrastructure.ts"
+import { getLogger } from "./constants-types-infrastructure.ts"
 
 export class MoniqueBaumann {
 
@@ -9,11 +10,7 @@ export class MoniqueBaumann {
 
     public static async getInstance(interestedIn: EDataTypes[]): Promise<void> {
         if (MoniqueBaumann.instance === undefined) {
-            const minLevelForConsole = 'DEBUG'
-            const minLevelForFile = 'WARNING'
-            const fileName = "./warnings-errors.txt"
-            const pureInfo = true // leaving out e.g. the time info
-            const logger = await Logger.getInstance(minLevelForConsole, minLevelForFile, fileName, pureInfo)
+            const logger = await getLogger()
             const provider = new ethers.JsonRpcProvider(getProviderURL(logger))
             const contract = await getContract(FC, provider)
             const broker = await Broker.getInstance(logger, contract, provider)
@@ -80,11 +77,11 @@ export class MoniqueBaumann {
                 break
             }
             case EActions.voteForPublicGood: {
-                transaction = await this.broker.voteFor("publicGoodsFunding", OPDonations, 999)
+                transaction = await this.broker.voteFor("publicGoodsFunding", FC, 999)
                 break
             }
             case EActions.voteForGeoCash: {
-                transaction = await this.broker.voteFor("geoCashing", VITALIK, 999, "geil")
+                transaction = await this.broker.voteFor("geoCashing", FC, 999, "geil")
                 break
             }
             case EActions.executeCommunityInvestment: {

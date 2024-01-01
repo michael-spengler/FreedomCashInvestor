@@ -1,6 +1,6 @@
 import { ethers, Logger } from "../deps.ts"
 
-export const FC = "0x4A87d063Da951ce443C346Da723787E622D14Cb2"
+export const FC = "0x0ddeDBa6b0995880381979A925607A99ab7Edd87"
 export const ROUTER = "0xE592427A0AEce92De3Edee1F18E0157C05861564"
 export const CULT = "0xf0f9D895aCa5c8678f706FB8216fa22957685A13"
 export const POD = "0xE90CE7764d8401d19ed3733a211bd3b06c631Bc0"
@@ -42,12 +42,30 @@ export interface IActionsCounters {
     count: number
 }
 
+let loggerInstance: Logger
+export async function getLogger() {
+    if (loggerInstance === undefined) {
+        const minLevelForConsole = 'DEBUG'
+        const minLevelForFile = 'WARNING'
+        const fileName = "./warnings-errors.txt"
+        const pureInfo = true // leaving out e.g. the time info
+        loggerInstance = await Logger.getInstance(minLevelForConsole, minLevelForFile, fileName, pureInfo)
+    }
+    return loggerInstance
+}
+
+export function getProvider(logger: Logger) {
+    return new ethers.JsonRpcProvider(getProviderURL(logger))
+}
+export function getABI() {
+    return JSON.parse(Deno.readTextFileSync('./freedomcash-abi.json'))
+}
 export async function getContract(asset: string, provider: any): Promise<any> {
-    const abi = JSON.parse(Deno.readTextFileSync('./freedomcash-abi.json'))
+    const abi = getABI()
     const configuration = JSON.parse(Deno.readTextFileSync('./.env.json'))
     // const wallet = new ethers.Wallet(configuration.pkTestWallet, provider)
     // return new ethers.Contract(asset, abi, wallet)
-    return new ethers.Contract(asset, abi, await provider.getSigner())
+       return new ethers.Contract(asset, abi, await provider.getSigner())
 }
 
 export function getProviderURL(logger: Logger): string {

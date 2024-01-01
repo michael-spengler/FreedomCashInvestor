@@ -317,7 +317,7 @@
 		"name": "geocashingCandidates",
 		"outputs": [
 			{
-				"internalType": "address",
+				"internalType": "address payable",
 				"name": "cAddress",
 				"type": "address"
 			},
@@ -351,7 +351,7 @@
 		"name": "getAddressOfHighestSoFar",
 		"outputs": [
 			{
-				"internalType": "address",
+				"internalType": "address payable",
 				"name": "",
 				"type": "address"
 			}
@@ -558,7 +558,7 @@
 		"name": "investmentCandidates",
 		"outputs": [
 			{
-				"internalType": "address",
+				"internalType": "address payable",
 				"name": "cAddress",
 				"type": "address"
 			},
@@ -650,7 +650,7 @@
 		"name": "pubGoodCandidates",
 		"outputs": [
 			{
-				"internalType": "address",
+				"internalType": "address payable",
 				"name": "cAddress",
 				"type": "address"
 			},
@@ -822,7 +822,7 @@
 	{
 		"inputs": [
 			{
-				"internalType": "address",
+				"internalType": "address payable",
 				"name": "geoCashAddress",
 				"type": "address"
 			},
@@ -850,7 +850,7 @@
 	{
 		"inputs": [
 			{
-				"internalType": "address",
+				"internalType": "address payable",
 				"name": "scAddress",
 				"type": "address"
 			},
@@ -873,7 +873,7 @@
 	{
 		"inputs": [
 			{
-				"internalType": "address",
+				"internalType": "address payable",
 				"name": "pubGoodWallet",
 				"type": "address"
 			},
