@@ -1,7 +1,7 @@
 import { sleep, Logger, ethers } from "../deps.ts"
 import { Broker } from "./broker.ts"
 import { Bollinger } from "./bollinger.ts"
-import { EDataTypes, IActionsCounters, EActions, EMode, FC, WETH, UNI, OPDonations, VITALIK } from "./constants-types-infrastructure.ts"
+import { getProviderURL, getContract, EDataTypes, IActionsCounters, EActions, EMode, FC, WETH, UNI, OPDonations, VITALIK, CENTRALIZEDFRAUD } from "./constants-types-infrastructure.ts"
 
 export class MoniqueBaumann {
 
@@ -14,17 +14,12 @@ export class MoniqueBaumann {
             const fileName = "./warnings-errors.txt"
             const pureInfo = true // leaving out e.g. the time info
             const logger = await Logger.getInstance(minLevelForConsole, minLevelForFile, fileName, pureInfo)
-            const provider = new ethers.JsonRpcProvider(Broker.getProviderURL(logger))
-            const contract = await MoniqueBaumann.getContract(FC, provider)
+            const provider = new ethers.JsonRpcProvider(getProviderURL(logger))
+            const contract = await getContract(FC, provider)
             const broker = await Broker.getInstance(logger, contract, provider)
             MoniqueBaumann.instance = new MoniqueBaumann(broker, logger, provider, contract, interestedIn)
         }
         return MoniqueBaumann.instance
-    }
-
-    public static async getContract(asset: string, provider: any): Promise<any> {
-        const abi = JSON.parse(Deno.readTextFileSync('./freedomcash-abi.json'))
-        return new ethers.Contract(asset, abi, await provider.getSigner())
     }
 
     private readonly freedomCashRocks = true
@@ -73,34 +68,38 @@ export class MoniqueBaumann {
         } else {
             executedActionCounter.count = executedActionCounter.count + 1
         }
-        this.logger.debug(this.executedActionsCounters)
     }
     protected async execute(action: EActions): Promise<void> {
-        this.logger.info(action)
 
         this.countActions(action)
 
+        let transaction: any
         switch (action) {
             case EActions.voteForInvestment: {
-                return this.broker.voteFor("investmentBet", UNI, 9999)
+                transaction = await this.broker.voteFor("investmentBet", CENTRALIZEDFRAUD, 9999)
+                break
             }
             case EActions.voteForPublicGood: {
-                return this.broker.voteFor("publicGoodsFunding", OPDonations, 999)
+                transaction = await this.broker.voteFor("publicGoodsFunding", OPDonations, 999)
+                break
             }
             case EActions.voteForGeoCash: {
-                return this.broker.voteFor("geoCashing", VITALIK, 999, "geil")
+                transaction = await this.broker.voteFor("geoCashing", VITALIK, 999, "geil")
+                break
             }
             case EActions.executeCommunityInvestment: {
-                const id = await this.broker.iCIDAt(UNI)
+                const investment = CENTRALIZEDFRAUD
+                const id = await this.broker.iCIDAt(investment)
                 const candidate = await this.broker.investmentCandidatesAt(id)
-                const poolAddress = await this.broker.getPoolAddress(WETH, UNI, 3000)
-                const price = await this.broker.getPriceForInvestment(UNI, poolAddress)
+                const poolAddress = await this.broker.getPoolAddress(WETH, investment, 3000)
+                const price = await this.broker.getPriceForInvestment(investment, poolAddress)
                 const amountOutMinimum = await this.broker.getAmountOutMinimum(WETH, BigInt(99 * 10 ** 15), price, 120)
                 const investmentBudget = await this.broker.investmentBudget()
                 const delta = candidate[1] - candidate[2]
                 this.logger.warning(`investmentBudget: ${investmentBudget} price: ${price} amountOutMinimum: ${amountOutMinimum} delta: ${delta}`)
                 if (delta > BigInt(0)) {
-                    return this.broker.executeCommunityInvestment(UNI, 3000, 120)
+                    transaction = await this.broker.executeCommunityInvestment(investment, 3000, 120)
+                    break
                 } else {
                     this.logger.warning(`makes no sense atm because delta: ${delta}`)
                     return
@@ -108,19 +107,21 @@ export class MoniqueBaumann {
                 return
             }
             case EActions.takeProfits: {
-                const investmentContract = await MoniqueBaumann.getContract(UNI, this.provider)
+                const investment = CENTRALIZEDFRAUD
+                const investmentContract = await getContract(investment, this.provider)
                 const balance = await investmentContract.balanceOf(FC)
                 let decimalsOfAsset = await investmentContract.decimals()
                 const oneThird = (balance / BigInt(3))
                 const amountInWei = BigInt(oneThird) * (BigInt(10) ** decimalsOfAsset)
-                if (oneThird < BigInt(1000000000000000)) {
+                if (oneThird < BigInt(1000000)) {
                     this.logger.warning(`not taking profits for now due to low balance`)
                     return
                 } else {
                     const buyPrice = await this.broker.getBuyPrice(1)
                     const sellPrice = await this.broker.getSellPrice()
                     if (sellPrice < buyPrice) {
-                        return this.broker.takeProfits(UNI, WETH, oneThird, 3000, 30)
+                        transaction = await this.broker.takeProfits(investment, WETH, oneThird, 3000, 30)
+                        break
                     } else {
                         this.logger.warning(`no need to take profits atm`)
                         return
@@ -129,17 +130,20 @@ export class MoniqueBaumann {
             }
             case EActions.sellFreedomCash: {
                 const balance = await this.broker.balanceOf()
-                return this.broker.sellFreedomCash(999)
+                transaction = await this.broker.sellFreedomCash(999)
+                break
             }
             default: throw new Error(`unknown action: ${action} (typeOfAction ${typeof (action)})`)
         }
+        this.logger.info(`waiting for transaction to complete: ${transaction.hash}`)
+
+        await transaction.wait()
 
     }
 
     protected async buy(): Promise<void> {
         // see example implementation in https://github.com/monique-baumann/FreedomCash/tree/main/deno/Monique.ts
     }
-
     protected async sell(): Promise<void> {
         // see example implementation in https://github.com/monique-baumann/FreedomCash/tree/main/deno/Monique.ts
     }

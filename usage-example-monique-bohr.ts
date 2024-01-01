@@ -15,3 +15,5 @@ interestedIn.push(EDataTypes.attestations)
 const moniqueBohr = await MoniqueBohr.getInstance(interestedIn)
 
 await moniqueBohr.play(EActions.voteForInvestment)
+await moniqueBohr.play(EActions.executeCommunityInvestment)
+await moniqueBohr.play(EActions.takeProfits)

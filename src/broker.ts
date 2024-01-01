@@ -1,5 +1,5 @@
 import { ethers, Logger } from '../deps.ts';
-import { EDataTypes } from './constants-types-infrastructure.ts';
+import { EDataTypes, CENTRALIZEDFRAUD, WETH } from './constants-types-infrastructure.ts';
 
 export class Broker {
 
@@ -13,21 +13,7 @@ export class Broker {
         return Broker.instance
     }
 
-    public static getProviderURL(logger: Logger): string {
-        let configuration: any = {}
-        if (Deno.args[0] !== undefined) { // supplying your provider URL via parameter
-            return Deno.args[0]
-        } else { // ... or via .env.json
-            try {
-                configuration = JSON.parse(Deno.readTextFileSync('./.env.json'))
-                return configuration.providerURL
-            } catch (error) {
-                logger.error(error.message)
-                logger.error("without a providerURL I cannot connect to the blockchain")
-            }
-        }
-        throw new Error("could not get a providerURL")
-    }
+
 
     private provider: any
     private contract: any
@@ -40,37 +26,46 @@ export class Broker {
 
     }
 
-    public async voteFor(voteType: string, asset: string, amountToBeBought: number, text?: string): Promise<void> {
+    public async voteFor(voteType: string, asset: string, amountToBeBought: number, text?: string) {
         this.logger.info(`\nvoting for ${voteType} for asset ${asset} with amountToBeBought ${amountToBeBought}`)
         const amountInWei = ethers.parseEther(amountToBeBought.toString())
         const bPrice = await this.contract.getBuyPrice(amountInWei);
         const bcost = BigInt(amountToBeBought) * bPrice;
         let transaction
         if (voteType == "investmentBet") {
+            this.logger.info(`\ncalling contract with ${asset} ${bPrice} ${amountInWei} ${bcost}`)
             transaction = await this.contract.voteForInvestmentIn(asset, bPrice, amountInWei, { value: bcost })
         } else if (voteType == "publicGoodsFunding") {
+            this.logger.info(`\ncalling contract with ${asset} ${bPrice} ${amountInWei} ${bcost}`)
             transaction = await this.contract.voteForPublicGood(asset, bPrice, amountInWei, { value: bcost })
         } else if (voteType == "geoCashing") {
+            this.logger.info(`\ncalling contract with ${asset} ${text} ${bPrice} ${amountInWei} ${bcost}`)
             transaction = await this.contract.voteForGeoCash(asset, text, bPrice, amountInWei, { value: bcost })
         }
-        await transaction.wait()
+        return transaction
     }
 
-    public async sellFreedomCash(amount: number): Promise<void> {
+    public async sellFreedomCash(amount: number) {
         this.logger.info("\nselling Freedom Cash")
         const sellPrice = await this.contract.getSellPrice()
-        await this.contract.sellFreedomCash((ethers.parseEther(amount.toString())), sellPrice)
+        const paraAmount = ethers.parseEther(amount.toString())
+        this.logger.info(`\ncalling contract with ${amount} ${sellPrice}`)
+        return this.contract.sellFreedomCash(paraAmount, sellPrice)
     }
-
+    
     public async executeCommunityInvestment(asset: string, poolFee: number, maxSlip: number) {
         const investmentBudget = await this.contract.investmentBudget()
         if (investmentBudget < BigInt(99 * 10 ** 15)) {
             throw new Error(`investment budget only at ${BigInt(investmentBudget)}`)
         }
         try {
-            this.logger.info(`\ncommunity investing into ${asset} with poolFee ${poolFee} and maxSlip: ${maxSlip}`)
-            const tx = await this.contract.executeCommunityInvestment(asset, poolFee, maxSlip);
-            await tx.wait()
+            const poolAddress = await this.getPoolAddress(WETH, CENTRALIZEDFRAUD, 3000)
+            const price = await this.getPriceForInvestment(CENTRALIZEDFRAUD, poolAddress)
+            const amountOutMinimum = await this.getAmountOutMinimum(CENTRALIZEDFRAUD, BigInt(99 * 10 ** 15), price, maxSlip)
+            const formattedPrice = ethers.formatEther(price)
+            this.logger.info(`\ncommunity investing ${BigInt(99 * 10 ** 15)} ${WETH} into ${asset} at a price of ${price} (${formattedPrice}) to receive at least ${amountOutMinimum} via pool ${poolAddress} ${poolFee} ${maxSlip}`)
+            this.logger.info(`\ncalling contract with ${asset} ${poolFee} ${maxSlip}`)
+            return this.contract.executeCommunityInvestment(asset, poolFee, maxSlip);
         } catch (error) {
             this.logger.error(error.message);
         }
@@ -83,8 +78,7 @@ export class Broker {
         this.logger.info(`\ntaking profits selling ${amountInWei} of ${sellAsset} at ${price} to receive at least: ${amountOutMinimum} ${buyAsset}`)
         try {
             this.logger.info(`\ncalling contract with ${sellAsset} ${amountInWei} ${poolFee} ${maxSlip}`)
-            const tx = await this.contract.takeProfits(sellAsset, amountInWei, poolFee, maxSlip);
-            await tx.wait()
+            return this.contract.takeProfits(sellAsset, amountInWei, poolFee, maxSlip);
         } catch (error) {
             alert(error.message);
         }
@@ -111,17 +105,17 @@ export class Broker {
             this.logger.debug(`geoCashingBudget: ${ethers.formatEther(await this.geoCashingBudget())}`)
             this.logger.debug(`liquidityBudget: ${ethers.formatEther(await this.liquidityBudget())}`)
         }
-        
+
         if (clientInterestedIn.indexOf(EDataTypes.attestations) > -1) {
             this.logger.info("\n\n*************************** Attestations ***************************")
             const aCounter = await this.contract.aCounter()
-            this.logger.info(`attestation counter: ${aCounter}`)
-            this.logger.info(`attestation 0: ${await this.contract.attestations(0)}`)
-            this.logger.info(`attestation 1: ${await this.contract.attestations(1)}`)
+            this.logger.debug(`attestation counter: ${aCounter}`)
+            this.logger.debug(`attestation 0: ${await this.contract.attestations(0)}`)
+            this.logger.debug(`attestation 1: ${await this.contract.attestations(1)}`)
             const latestAttestation = await this.contract.attestations(aCounter)
             const splitted = latestAttestation.toString().split(",")
             const result = ethers.decodeBytes32String(splitted[2])
-            this.logger.info(`attestation ${aCounter}: ${result}`)
+            this.logger.debug(`attestation ${aCounter}: ${result}`)
         }
 
         if (clientInterestedIn.indexOf(EDataTypes.gamingData) > -1) {

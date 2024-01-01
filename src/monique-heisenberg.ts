@@ -140,7 +140,6 @@ export class MoniqueBaumann {
         this.logger.debug(this.executedActionsCounters)
     }
     private async execute(action: EActions): Promise<void> {
-        this.logger.info(action)
 
         this.countActions(action)
 

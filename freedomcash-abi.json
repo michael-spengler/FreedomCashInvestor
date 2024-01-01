@@ -363,7 +363,7 @@
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "tIn",
+				"name": "tOut",
 				"type": "address"
 			},
 			{
@@ -708,39 +708,6 @@
 			}
 		],
 		"name": "sellFreedomCash",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "tIn",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "tOut",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "aIn",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint24",
-				"name": "poolFee",
-				"type": "uint24"
-			},
-			{
-				"internalType": "uint256",
-				"name": "amountOutMinimum",
-				"type": "uint256"
-			}
-		],
-		"name": "swipSwapV3",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"

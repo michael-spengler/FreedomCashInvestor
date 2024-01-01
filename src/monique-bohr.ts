@@ -1,6 +1,6 @@
 import { Logger, ethers } from "../deps.ts"
 import { Broker } from "./broker.ts"
-import { EActions, EDataTypes, getContract, VITALIK, UNI, OPDonations, WETH, FC } from "./constants-types-infrastructure.ts"
+import { getProviderURL, EActions, EDataTypes, getContract, VITALIK, UNI, OPDonations, WETH, FC } from "./constants-types-infrastructure.ts"
 import { MoniqueBaumann } from "./monique-baumann.ts"
 
 export class MoniqueBohr extends MoniqueBaumann {
@@ -14,7 +14,7 @@ export class MoniqueBohr extends MoniqueBaumann {
             const fileName = "./warnings-errors.txt"
             const pureInfo = true // leaving out e.g. the time info
             const logger = await Logger.getInstance(minLevelForConsole, minLevelForFile, fileName, pureInfo)
-            const provider = new ethers.JsonRpcProvider(Broker.getProviderURL(logger))
+            const provider = new ethers.JsonRpcProvider(getProviderURL(logger))
             const contract = await getContract(FC, provider)
             const broker = await Broker.getInstance(logger, contract, provider)
             MoniqueBohr.instance = new MoniqueBohr(broker, logger, provider, contract, interestedIn)
@@ -37,7 +37,6 @@ export class MoniqueBohr extends MoniqueBaumann {
         this.contract = contract
     }
     public async play(action: EActions) {
-        this.logger.info(action)
         await super.execute(action)
         await this.broker.logFundamentals(this.interestedIn, FC)
     }

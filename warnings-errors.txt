@@ -374,3 +374,6 @@ ERROR Mon Jan 01 2024 01:14:52 GMT+0100 (Central European Standard Time) TypeErr
     at async MoniqueBaumann.play (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/monique-baumann.ts:85:17)
     at async file:///home/master/Desktop/deno-modules/freedom_cash_investor/usage-example-actions-random.ts:22:1
 WARNING Mon Jan 01 2024 01:15:24 GMT+0100 (Central European Standard Time) investmentBudget: 1009491140790000000 price: 435413369042177 amountOutMinimum: 227370143038511548 delta: 2
+WARNING Mon Jan 01 2024 13:46:00 GMT+0100 (Central European Standard Time) investmentBudget: 2969406029700000000 price: 3184893777141588 amountOutMinimum: 27354130497309513055 delta: 4
+WARNING Mon Jan 01 2024 15:11:16 GMT+0100 (Central European Standard Time) investmentBudget: 1781643617820000000 price: 436378604847550 amountOutMinimum: 199643151685760575899 delta: 3
+WARNING Mon Jan 01 2024 15:54:03 GMT+0100 (Central European Standard Time) investmentBudget: 2672406029700000000 price: 436380029708993 amountOutMinimum: 199642499813974908392 delta: 1
