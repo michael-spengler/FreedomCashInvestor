@@ -76,7 +76,7 @@ export class MoniqueBaumann {
         let transaction: any
         switch (action) {
             case EActions.voteForInvestment: {
-                transaction = await this.broker.voteFor("investmentBet", UNI, 999)
+                transaction = await this.broker.voteFor("investmentBet", UNI, 9999)
                 break
             }
             case EActions.voteForPublicGood: {
@@ -101,7 +101,6 @@ export class MoniqueBaumann {
                     this.logger.warning(`makes no sense atm because delta: ${delta}`)
                     return
                 }
-                return
             }
             case EActions.takeProfits: {
                 const investment = UNI
@@ -109,15 +108,18 @@ export class MoniqueBaumann {
                 const balance = await investmentContract.balanceOf(FC)
                 let decimalsOfAsset = await investmentContract.decimals()
                 const oneThird = (balance / BigInt(3))
-                const amountInWei = BigInt(oneThird) * (BigInt(10) ** decimalsOfAsset)
                 if (oneThird < BigInt(1000000)) {
-                    this.logger.warning(`not taking profits for now due to low balance`)
+                    this.logger.warning(`not taking profits for now due to low ${investment} balance of ${balance}`)
                     return
                 } else {
+                    const sellAmount = BigInt(10**18)
+                    // 154915529986723658084
+                    // 1000000000000000000
+                    this.logger.warning(`taking profits by selling ${sellAmount} ${investment} at current balance of ${balance}`)
                     const buyPrice = await this.broker.getBuyPrice(1)
                     const sellPrice = await this.broker.getSellPrice()
                     if (sellPrice < buyPrice) {
-                        transaction = await this.broker.takeProfits(investment, WETH, oneThird, 3000, 30)
+                        transaction = await this.broker.takeProfits(investment, WETH, sellAmount, 3000, 120)
                         break
                     } else {
                         this.logger.warning(`no need to take profits atm`)

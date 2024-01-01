@@ -6,12 +6,10 @@ Total Supply:   369.369.369 Freedom Cash (FREEDOMCASH)
 
 Utility:        Community investing in decentralized currencies while funding public goods 
                 and providing playgrounds for freedom.
-
 Liquidity:      The total supply of Freedom Cash is minted not to the developer or 
                 deployer but to the smart contract itself (see constructor address(this)). 
                 ETH liquidity is accrued automatically (see token economics diagram). 
                 You might consider contributing to https://deno.land/x/freedom_cash_investor.
-
 "Regulators":   Please think for yourself about the following while you go for a walk offline: 
                 The crimes of the "governments" you worked for, seem much more dangerous to humanity 
                 than the crimes which abuse freedom and privacy of money. 
@@ -25,15 +23,15 @@ Liquidity:      The total supply of Freedom Cash is minted not to the developer 
                 we invite you to join us, learn with us, help us and enjoy also
                 the technical pulses of freedom block by block by block by block by block by block 
                 by block by block by block
-
 Wish:           Everyone who reads this with the best of intentions shall always have enough 
                 Freedom Cash stored within self hosted paperwallets which shall be utilized 
                 for fruitful and fair exploration of truth and peer to peer collaboration. 
                 Please make Freedom Cash an homage to all who play for freedom and invest 
                 some Finney right now. Start small and talk about Freedom. 
-                We wish you all the best. */
-                
+                We wish you all the best. */    
+
 pragma solidity 0.8.19;
+
 import "https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/v4.9.4/contracts/token/ERC20/ERC20.sol";
 import "https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/v4.9.4/contracts/utils/math/Math.sol";
 import "https://github.com/Uniswap/v3-periphery/blob/v1.2.0/contracts/interfaces/ISwapRouter.sol";
@@ -70,13 +68,13 @@ contract FreedomCash is ERC20 {
         uint256 successes;   
         uint256 score;
     }
-    struct Attestation { // Will be integrated with EAS via Freedom Enterprise
+    struct Attestation { // potential input for EAS via Freedom Enterprise
         address voter;
         address votedForAsset;
         bytes32 ofType; 
         uint256 WithValue;
         uint256 timestamp;
-    }    
+    }   
     mapping(uint256 => ICandidateInfo)  public investmentCandidates;
     mapping(uint256 => PGCandidateInfo) public pubGoodCandidates;
     mapping(uint256 => GCCandidateInfo) public geocashingCandidates;   
@@ -260,17 +258,19 @@ contract FreedomCash is ERC20 {
             return Math.mulDiv(amount0, 10**18, amount1);
         }
     }    
-    function swipSwapV3(address tIn, address tOut,uint256 aIn, uint24 poolFee, uint256 amountOutMinimum) internal {
+    function swipSwapV3(address tIn, address tOut,uint256 aIn, uint24 poolFee, uint256 amountOutMinimum) public {
         ISwapRouter swapRouter = ISwapRouter(routerAddress);
         if (IERC20(tIn).allowance(address(this), address(routerAddress)) < aIn) {
             IERC20(tIn).approve(address(routerAddress), IERC20(tIn).balanceOf(address(this)));
         }
         ISwapRouter.ExactInputSingleParams memory params =
-            ISwapRouter.ExactInputSingleParams({tokenIn: tIn,tokenOut: tOut,fee: poolFee, recipient: address(this),
+            ISwapRouter.ExactInputSingleParams({tokenIn: tIn,tokenOut: tOut,fee: poolFee,recipient: address(this),
                 deadline: block.timestamp + 60, amountIn: aIn,amountOutMinimum: amountOutMinimum, 
                 sqrtPriceLimitX96: 0 // not needed because amountOutMinimum avoids exploits
             });
-        swapRouter.exactInputSingle{value: aIn}(params);
+        unchecked {
+            swapRouter.exactInputSingle{value: aIn}(params);
+        }
         reconcileAndClear(); 
     }    
     function reconcileAndClear() internal {

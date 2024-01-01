@@ -4,7 +4,7 @@ import { Bollinger } from "./bollinger.ts"
 import { getContract, EDataTypes, IActionsCounters, EMode, EActions, FC } from "./constants-types-infrastructure.ts"
 import { MoniqueBaumann } from "./monique-baumann.ts"
 
-export class MoniqueHeisenberg extends MoniqueBaumann {
+export class MoniqueBollinger extends MoniqueBaumann {
 
     public static instance
 
@@ -59,12 +59,12 @@ export class MoniqueHeisenberg extends MoniqueBaumann {
         }
     }
     private async playRound(minHistoryLength: number, spreadFactor: number, action: EActions, mode: EMode): Promise<void> {
-        if (mode === EMode.actionRandom) {
-            const index = Math.round((Math.random() * ((6 - 1) - 0) + 0))
-            const randomAction = Object.values(EActions)[index]
-            await super.execute(randomAction)
+        if (mode === EMode.bollingerDemo) {
+            await this.playBollinger(minHistoryLength, spreadFactor, mode)
+        } else if (mode === EMode.bollingerReal) {
+            await this.playBollinger(minHistoryLength, spreadFactor, mode)
         } else {
-            this.logger.error(`I only work in "random" action mode`)
+            this.logger.error(`I only work in Bollinger Modes`)
         }
 
         await this.broker.logFundamentals(this.interestedIn, FC)

@@ -1,6 +1,6 @@
 import { ethers, Logger } from "../deps.ts"
 
-export const FC = "0x009533DeC74d1b4becb83673C8C89A1b1F977783"
+export const FC = "0x4A87d063Da951ce443C346Da723787E622D14Cb2"
 export const ROUTER = "0xE592427A0AEce92De3Edee1F18E0157C05861564"
 export const CULT = "0xf0f9D895aCa5c8678f706FB8216fa22957685A13"
 export const POD = "0xE90CE7764d8401d19ed3733a211bd3b06c631Bc0"
@@ -12,7 +12,12 @@ export const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
 export const UNI = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984"
 export const CENTRALIZEDFRAUD = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
 
-
+export enum EMode {
+    actionRandom,
+    actionSpecific,
+    bollingerReal,
+    bollingerDemo
+}
 
 export enum EActions {
     voteForInvestment,
