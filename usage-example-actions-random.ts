@@ -8,6 +8,7 @@ const interestedIn: EDataTypes[] = []
 interestedIn.push(EDataTypes.budgetData)
 interestedIn.push(EDataTypes.gamingData)
 interestedIn.push(EDataTypes.pricingData)
+interestedIn.push(EDataTypes.attestations)
 // interestedIn.push(EDataTypes.masterData) // not too interesting in Monique's day to day life
 // interestedIn.push(EDataTypes.operationalData) // not too interesting in Monique's day to day life
 

@@ -1,5 +1,5 @@
 import { ethers, Logger } from '../deps.ts';
-import { EDataTypes, WETH, FC } from './monique-baumann.ts';
+import { EDataTypes } from './constants-types-infrastructure.ts';
 
 export class Broker {
 
@@ -12,7 +12,6 @@ export class Broker {
         }
         return Broker.instance
     }
-
 
     public static getProviderURL(logger: Logger): string {
         let configuration: any = {}
@@ -43,8 +42,6 @@ export class Broker {
 
     public async voteFor(voteType: string, asset: string, amountToBeBought: number, text?: string): Promise<void> {
         this.logger.info(`\nvoting for ${voteType} for asset ${asset} with amountToBeBought ${amountToBeBought}`)
-        let balance = await this.contract.balanceOf(FC)
-        this.logger.debug(`sc balance before: ${ethers.formatEther(balance)}`)
         const amountInWei = ethers.parseEther(amountToBeBought.toString())
         const bPrice = await this.contract.getBuyPrice(amountInWei);
         const bcost = BigInt(amountToBeBought) * bPrice;
@@ -57,22 +54,12 @@ export class Broker {
             transaction = await this.contract.voteForGeoCash(asset, text, bPrice, amountInWei, { value: bcost })
         }
         await transaction.wait()
-        balance = await this.contract.balanceOf(FC)
-        this.logger.debug(`sc balance after : ${ethers.formatEther(balance)}`)
     }
 
     public async sellFreedomCash(amount: number): Promise<void> {
         this.logger.info("\nselling Freedom Cash")
-        let balance = await this.contract.balanceOf(FC)
-        if (balance === await this.contract.totalSupply()) {
-            this.logger.warning("the game did not even start")
-        } else {
-            this.logger.debug(`sc balance before: ${ethers.formatEther(balance)}`)
-            const sellPrice = await this.contract.getSellPrice()
-            await this.contract.sellFreedomCash((ethers.parseEther(amount.toString())), sellPrice)
-            balance = await this.contract.balanceOf(FC)
-            this.logger.info(`sc balance after : ${ethers.formatEther(balance)}`)
-        }
+        const sellPrice = await this.contract.getSellPrice()
+        await this.contract.sellFreedomCash((ethers.parseEther(amount.toString())), sellPrice)
     }
 
     public async executeCommunityInvestment(asset: string, poolFee: number, maxSlip: number) {
@@ -81,7 +68,7 @@ export class Broker {
             throw new Error(`investment budget only at ${BigInt(investmentBudget)}`)
         }
         try {
-            this.logger.info(`\ncommunity investing into ${asset}`)
+            this.logger.info(`\ncommunity investing into ${asset} with poolFee ${poolFee} and maxSlip: ${maxSlip}`)
             const tx = await this.contract.executeCommunityInvestment(asset, poolFee, maxSlip);
             await tx.wait()
         } catch (error) {
@@ -89,18 +76,88 @@ export class Broker {
         }
     }
 
-    public async takeProfits(asset: string, amountInWei: bigint, poolFee: number, maxSlip: number): Promise<void> {
-        const poolAddress = await this.getPoolAddress(asset, WETH, 3000)
-        const price = await this.getPriceForInvestment(WETH, poolAddress)
-        const amountOutMinimum = await this.getAmountOutMinimum(asset, amountInWei, price, maxSlip)
-        this.logger.info(`\ntaking profits selling ${amountInWei} of ${asset} at ${price} to receive at least: ${amountOutMinimum} ${WETH}`)
+    public async takeProfits(sellAsset: string, buyAsset: string, amountInWei: bigint, poolFee: number, maxSlip: number): Promise<void> {
+        const poolAddress = await this.getPoolAddress(sellAsset, buyAsset, 3000)
+        const price = await this.getPriceForInvestment(buyAsset, poolAddress)
+        const amountOutMinimum = await this.getAmountOutMinimum(sellAsset, amountInWei, price, maxSlip)
+        this.logger.info(`\ntaking profits selling ${amountInWei} of ${sellAsset} at ${price} to receive at least: ${amountOutMinimum} ${buyAsset}`)
         try {
-            const tx = await this.contract.takeProfits(asset, amountInWei, poolFee, maxSlip);
+            this.logger.info(`\ncalling contract with ${sellAsset} ${amountInWei} ${poolFee} ${maxSlip}`)
+            const tx = await this.contract.takeProfits(sellAsset, amountInWei, poolFee, maxSlip);
             await tx.wait()
         } catch (error) {
             alert(error.message);
         }
     }
+
+    public async logFundamentals(clientInterestedIn: EDataTypes[], scAddress: string): Promise<void> {
+
+        if (clientInterestedIn.indexOf(EDataTypes.masterData) > -1) {
+            this.logger.info("\n\n*************************** Master Data ***************************")
+            this.logger.debug(`smartContractAddress: ${scAddress}`)
+            this.logger.debug(`totalSupply: ${ethers.formatEther(await this.totalSupply())}`)
+            this.logger.debug(`symbol: ${await this.symbol()}`)
+            this.logger.debug(`routerAddress: ${await this.routerAddress()}`)
+            this.logger.debug(`factoryAddress: ${await this.factoryAddress()}`)
+            this.logger.debug(`wethAddress: ${await this.wethAddress()}`)
+        }
+
+        if (clientInterestedIn.indexOf(EDataTypes.budgetData) > -1) {
+            this.logger.info("\n\n*************************** Budget Data ***************************")
+            this.logger.debug(`amountOfETHInSmartContract: ${ethers.formatEther(await this.amountOfETHInSmartContract(scAddress))}`)
+            this.logger.debug(`balanceOf Smart Contract: ${ethers.formatEther(await this.balanceOf(scAddress))}`)
+            this.logger.debug(`investmentBudget: ${ethers.formatEther(await this.investmentBudget())}`)
+            this.logger.debug(`pubGoodsFundingBudget: ${ethers.formatEther(await this.pubGoodsFundingBudget())}`)
+            this.logger.debug(`geoCashingBudget: ${ethers.formatEther(await this.geoCashingBudget())}`)
+            this.logger.debug(`liquidityBudget: ${ethers.formatEther(await this.liquidityBudget())}`)
+        }
+        
+        if (clientInterestedIn.indexOf(EDataTypes.attestations) > -1) {
+            this.logger.info("\n\n*************************** Attestations ***************************")
+            const aCounter = await this.contract.aCounter()
+            this.logger.info(`attestation counter: ${aCounter}`)
+            this.logger.info(`attestation 0: ${await this.contract.attestations(0)}`)
+            this.logger.info(`attestation 1: ${await this.contract.attestations(1)}`)
+            const latestAttestation = await this.contract.attestations(aCounter)
+            const splitted = latestAttestation.toString().split(",")
+            const result = ethers.decodeBytes32String(splitted[2])
+            this.logger.info(`attestation ${aCounter}: ${result}`)
+        }
+
+        if (clientInterestedIn.indexOf(EDataTypes.gamingData) > -1) {
+            this.logger.info("\n\n*************************** Gaming Data ***************************")
+            this.logger.debug(`addressOfHighestSoFarInvestment: ${await this.addressOfHighestSoFarInvestment()}`)
+            this.logger.debug(`addressOfHighestSoFarPublicGood: ${await this.addressOfHighestSoFarPublicGood()}`)
+            this.logger.debug(`addressOfHighestSoFarGeoCash: ${await this.addressOfHighestSoFarGeoCash()}`)
+            this.logger.debug(`investmentCandidatesAt1: ${await this.investmentCandidatesAt(1)}`)
+            this.logger.debug(`investmentCandidatesAt2: ${await this.investmentCandidatesAt(2)}`)
+            this.logger.debug(`pubGoodCandidatesAt1: ${await this.pubGoodCandidatesAt(1)}`)
+            this.logger.debug(`pubGoodCandidatesAt2: ${await this.pubGoodCandidatesAt(2)}`)
+            this.logger.debug(`geoCashingCandidatesAt1: ${await this.geoCashingCandidatesAt(1)}`)
+            this.logger.debug(`geoCashingCandidatesAt2: ${await this.geoCashingCandidatesAt(2)}`)
+        }
+
+        if (clientInterestedIn.indexOf(EDataTypes.operationalData) > -1) {
+            this.logger.info("\n\n*************************** Operational Data ***************************")
+            this.logger.debug(`iCCounter: ${await this.iCCounter()}`)
+            this.logger.debug(`pGCCounter: ${await this.pGCCounter()}`)
+            this.logger.debug(`gCCCounter: ${await this.gCCCounter()}`)
+            this.logger.debug(`iCIDsAtFC: ${await this.iCIDAt(scAddress)}`)
+            this.logger.debug(`pGCIDsAtOPDonations: ${await this.pGCIDAt(scAddress)}`)
+            this.logger.debug(`gCCIDsAtVitalik: ${await this.gCCIDAt(scAddress)}`)
+        }
+
+        if (clientInterestedIn.indexOf(EDataTypes.pricingData) > -1) {
+            this.logger.info("\n\n*************************** Pricing Data ***************************")
+            this.logger.debug(`buyPrice: ${ethers.formatEther(await this.getBuyPrice(1))}`)
+            try {
+                this.logger.debug(`sellPrice: ${ethers.formatEther(await this.getSellPrice())}`)
+            } catch (error) {
+                this.logger.warning(`could not determine a sell price atm`)
+            }
+        }
+    }
+
 
     public async getBuyPrice(amountToBeBought: number): Promise<BigInt> {
         let aToBeBoughtInWei = BigInt(ethers.parseEther(amountToBeBought.toString()));
@@ -124,11 +181,11 @@ export class Broker {
     public async wethAddress(): Promise<any> {
         return this.contract.wethAddress()
     }
-    public async amountOfETHInSmartContract(): Promise<any> {
-        return this.provider.getBalance(FC)
+    public async amountOfETHInSmartContract(scAddress: string): Promise<any> {
+        return this.provider.getBalance(scAddress)
     }
-    public async balanceOf(): Promise<any> {
-        return this.contract.balanceOf(FC)
+    public async balanceOf(scAddress: string): Promise<any> {
+        return this.contract.balanceOf(scAddress)
     }
     public async geoCashingBudget(): Promise<any> {
         return this.contract.geoCashingBudget()
@@ -190,58 +247,4 @@ export class Broker {
     public async allowance(owner: string, spender: string): Promise<any> {
         return this.contract.allowance(owner, spender)
     }
-    public async logFundamentals(clientInterestedIn: EDataTypes[]): Promise<void> {
-
-        if (clientInterestedIn.indexOf(EDataTypes.masterData) > -1) {
-            this.logger.info("\n\n*************************** Master Data ***************************")
-            this.logger.debug(`smartContractAddress: ${FC}`)
-            this.logger.debug(`totalSupply: ${ethers.formatEther(await this.totalSupply())}`)
-            this.logger.debug(`symbol: ${await this.symbol()}`)
-            this.logger.debug(`routerAddress: ${await this.routerAddress()}`)
-            this.logger.debug(`factoryAddress: ${await this.factoryAddress()}`)
-            this.logger.debug(`wethAddress: ${await this.wethAddress()}`)
-        }
-
-        if (clientInterestedIn.indexOf(EDataTypes.budgetData) > -1) {
-            this.logger.info("\n\n*************************** Budget Data ***************************")
-            this.logger.debug(`amountOfETHInSmartContract: ${ethers.formatEther(await this.amountOfETHInSmartContract())}`)
-            this.logger.debug(`balanceOf Smart Contract: ${ethers.formatEther(await this.balanceOf())}`)
-            this.logger.debug(`investmentBudget: ${ethers.formatEther(await this.investmentBudget())}`)
-            this.logger.debug(`pubGoodsFundingBudget: ${ethers.formatEther(await this.pubGoodsFundingBudget())}`)
-            this.logger.debug(`geoCashingBudget: ${ethers.formatEther(await this.geoCashingBudget())}`)
-            this.logger.debug(`liquidityBudget: ${ethers.formatEther(await this.liquidityBudget())}`)
-        }
-
-        if (clientInterestedIn.indexOf(EDataTypes.gamingData) > -1) {
-            this.logger.info("\n\n*************************** Gaming Data ***************************")
-            this.logger.debug(`addressOfHighestSoFarInvestment: ${await this.addressOfHighestSoFarInvestment()}`)
-            this.logger.debug(`addressOfHighestSoFarPublicGood: ${await this.addressOfHighestSoFarPublicGood()}`)
-            this.logger.debug(`addressOfHighestSoFarGeoCash: ${await this.addressOfHighestSoFarGeoCash()}`)
-            this.logger.debug(`investmentCandidatesAt1: ${await this.investmentCandidatesAt(1)}`)
-            this.logger.debug(`pubGoodCandidatesAt1: ${await this.pubGoodCandidatesAt(1)}`)
-            this.logger.debug(`geoCashingCandidatesAt1: ${await this.geoCashingCandidatesAt(1)}`)
-
-        }
-
-        if (clientInterestedIn.indexOf(EDataTypes.operationalData) > -1) {
-            this.logger.info("\n\n*************************** Operational Data ***************************")
-            this.logger.debug(`iCCounter: ${await this.iCCounter()}`)
-            this.logger.debug(`pGCCounter: ${await this.pGCCounter()}`)
-            this.logger.debug(`gCCCounter: ${await this.gCCCounter()}`)
-            this.logger.debug(`iCIDsAtFC: ${await this.iCIDAt(FC)}`)
-            this.logger.debug(`pGCIDsAtOPDonations: ${await this.pGCIDAt(FC)}`)
-            this.logger.debug(`gCCIDsAtVitalik: ${await this.gCCIDAt(FC)}`)
-        }
-
-        if (clientInterestedIn.indexOf(EDataTypes.pricingData) > -1) {
-            this.logger.info("\n\n*************************** Pricing Data ***************************")
-            this.logger.debug(`buyPrice: ${ethers.formatEther(await this.getBuyPrice(1))}`)
-            try {
-                this.logger.debug(`sellPrice: ${ethers.formatEther(await this.getSellPrice())}`)
-            } catch (error) {
-                this.logger.warning(`could not determine a sell price atm`)
-            }
-        }
-    }
-
 }

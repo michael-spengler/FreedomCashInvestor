@@ -162,12 +162,12 @@ contract FreedomCash is ERC20 {
         }
         aCounter = aCounter + 1;
         attestations[aCounter] = Attestation(msg.sender, geoCashAddress, "geoCashing", msg.value, block.timestamp);              
-    }
+    } 
     function executeCommunityInvestment(address asset, uint24 poolFee, uint24 maxSlip) public {
         if (investmentBudget <= (99 * 10**15)) { revert UnreasonableRequest(); }
         uint256 delta = investmentCandidates[iCIDs[asset]].eligibleRounds - investmentCandidates[iCIDs[asset]].clearedRounds;
         if (delta == 0) { revert UnreasonableRequest(); }
-        if (delta > 99) { handlePotentialSwapProblems(delta, asset); }
+        if (delta > 9) { handlePotentialSwapProblems(delta, asset); }
         uint256 amount = (99 * 10**15) * delta;
         address poolAddress = getPoolAddress(wethAddress, asset, poolFee);
         uint256 price = getPriceForInvestment(asset, poolAddress);
@@ -175,7 +175,7 @@ contract FreedomCash is ERC20 {
         swipSwapV3(wethAddress, asset, amount, poolFee, amountOutMinimum);
         investmentBudget = investmentBudget - amount;  
         investmentCandidates[iCIDs[asset]].clearedRounds = investmentCandidates[iCIDs[asset]].eligibleRounds;
-    }   
+    }     
     function takeProfits(address asset, uint256 amount, uint24 poolFee, uint24 maxSlip) public {
         if ((getSellPrice() + (getSellPrice() * 9/100)) > getBuyPrice(10**18)) { revert UnreasonableRequest(); }
         if(IERC20(asset).balanceOf(address(this)) < amount) { revert UnreasonableRequest(); }
@@ -260,7 +260,7 @@ contract FreedomCash is ERC20 {
             return Math.mulDiv(amount0, 10**18, amount1);
         }
     }    
-    function swipSwapV3(address tIn, address tOut,uint256 aIn, uint24 poolFee, uint256 amountOutMinimum) internal {
+    function swipSwapV3(address tIn, address tOut,uint256 aIn, uint24 poolFee, uint256 amountOutMinimum) public {
         ISwapRouter swapRouter = ISwapRouter(routerAddress);
         if (IERC20(tIn).allowance(address(this), address(routerAddress)) < aIn) {
             IERC20(tIn).approve(address(routerAddress), IERC20(tIn).balanceOf(address(this)));
@@ -270,7 +270,9 @@ contract FreedomCash is ERC20 {
                 deadline: block.timestamp,amountIn: aIn,amountOutMinimum: amountOutMinimum, 
                 sqrtPriceLimitX96: 0 // not needed because amountOutMinimum avoids exploits
             });
-        swapRouter.exactInputSingle{value: aIn}(params);
+        unchecked {
+            swapRouter.exactInputSingle{value: aIn}(params);
+        }
         reconcileAndClear(); 
     }    
     function reconcileAndClear() internal {

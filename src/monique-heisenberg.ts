@@ -1,7 +1,36 @@
 import { sleep, Logger, ethers } from "../deps.ts"
 import { Broker } from "./broker.ts"
 import { Bollinger } from "./bollinger.ts"
-import { EDataTypes, IActionsCounters, EActions, EMode, FC, WETH, UNI, OPDonations, VITALIK } from "./constants-types-infrastructure.ts"
+
+export enum EMode {
+    actionRandom,
+    actionSpecific,
+    bollingerReal,
+    bollingerDemo
+}
+
+export enum EActions {
+    voteForInvestment = "Vote for Investment",
+    voteForPublicGood = "Vote for Public Good",
+    voteForGeoCash = "Vote for GeoCash",
+    executeCommunityInvestment = "Execute Community Investment",
+    takeProfits = "Take Profits",
+    sellFreedomCash = "Sell Freedom Cash"
+}
+
+export enum EDataTypes {
+    masterData,
+    gamingData,
+    pricingData,
+    budgetData,
+    operationalData,
+    attestations
+}
+
+interface IActionsCounters {
+    action: EActions,
+    count: number
+}
 
 export class MoniqueBaumann {
 
@@ -38,7 +67,7 @@ export class MoniqueBaumann {
     private interestedIn: EDataTypes[] = []
     private executedActionsCounters: IActionsCounters[] = []
 
-    protected constructor(broker: Broker, logger: Logger, provider: any, contract: any, interestedIn: EDataTypes[]) {
+    private constructor(broker: Broker, logger: Logger, provider: any, contract: any, interestedIn: EDataTypes[]) {
         this.logger = logger
         this.broker = broker
         this.bollinger = new Bollinger(27, logger)
@@ -61,12 +90,47 @@ export class MoniqueBaumann {
             this.roundIsActive = false
         }
     }
-    protected async playRound(minHistoryLength: number, spreadFactor: number, action: EActions, mode: EMode): Promise<void> {
-        await this.execute(action)
+    private async playRound(minHistoryLength: number, spreadFactor: number, action: EActions, mode: EMode): Promise<void> {
+        if (minHistoryLength > 0 && spreadFactor > 0) {
+            if (mode === EMode.bollingerDemo) {
+                await this.playBollinger(minHistoryLength, spreadFactor, mode)
+            } else if (mode === EMode.bollingerReal) {
+                await this.playBollinger(minHistoryLength, spreadFactor, mode)
+            }
+        } else if (minHistoryLength === 0 && spreadFactor === 0) {
+            if (mode === EMode.actionRandom) {
+                const index = Math.round((Math.random() * ((6 - 1) - 0) + 0))
+                const randomAction = Object.values(EActions)[index]
+                await this.execute(randomAction)
+            } else if (mode === EMode.actionSpecific) {
+                await this.execute(action)
+            }
+        }
         await this.broker.logFundamentals(this.interestedIn, FC)
     }
-
-    protected countActions(action: EActions) {
+    private async playBollinger(minHistoryLength: number, factor: number, mode: EMode) {
+        this.logger.info("\n\n*************************** Pulses Of Freedom ***************************")
+        await this.broker.logFundamentals()
+        let price: number
+        if (mode === EMode.bollingerReal) {
+            price = await this.broker.getBuyPrice(ethers.parseEther("1"))
+        } else {
+            price = Math.round((Math.random() * (81 - 9) + 9))
+        }
+        this.bollinger.addToPriceHistory(price)
+        const investmentDecision = this.bollinger.getInvestmentDecision(minHistoryLength, factor)
+        if (investmentDecision == "buy") {
+            if (mode === EMode.bollingerDemo) {
+                this.logger.info("not really buying because we are in demo mode")
+            } else if (mode === EMode.bollingerReal) {
+                await this.buy()
+            }
+        } else if (investmentDecision == "sell") {
+            await this.sell()
+        }
+        return
+    }
+    private countActions(action: EActions) {
         const executedActionCounter = this.executedActionsCounters.filter((e => e.action === action))[0]
         if (executedActionCounter === undefined) {
             this.executedActionsCounters.push({ action: action, count: 1 })
@@ -75,7 +139,7 @@ export class MoniqueBaumann {
         }
         this.logger.debug(this.executedActionsCounters)
     }
-    protected async execute(action: EActions): Promise<void> {
+    private async execute(action: EActions): Promise<void> {
         this.logger.info(action)
 
         this.countActions(action)
@@ -95,7 +159,7 @@ export class MoniqueBaumann {
                 const candidate = await this.broker.investmentCandidatesAt(id)
                 const poolAddress = await this.broker.getPoolAddress(WETH, UNI, 3000)
                 const price = await this.broker.getPriceForInvestment(UNI, poolAddress)
-                const amountOutMinimum = await this.broker.getAmountOutMinimum(WETH, BigInt(99 * 10 ** 15), price, 120)
+                const amountOutMinimum = await this.broker.getAmountOutMinimum(WETH, BigInt(99*10**15), price, 120)
                 const investmentBudget = await this.broker.investmentBudget()
                 const delta = candidate[1] - candidate[2]
                 this.logger.warning(`investmentBudget: ${investmentBudget} price: ${price} amountOutMinimum: ${amountOutMinimum} delta: ${delta}`)
@@ -144,3 +208,16 @@ export class MoniqueBaumann {
         // see example implementation in https://github.com/monique-baumann/FreedomCash/tree/main/deno/Monique.ts
     }
 }
+
+const FC = "0x2c83071bC5784b4115D59Dd17E7445A01374725F"
+const ROUTER = "0xE592427A0AEce92De3Edee1F18E0157C05861564"
+const CULT = "0xf0f9D895aCa5c8678f706FB8216fa22957685A13"
+const POD = "0xE90CE7764d8401d19ed3733a211bd3b06c631Bc0"
+const SHIB = "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE"
+const OPDonations = "0x2D1bEB3e41D90d7F9756e92c3061265206a661A2"
+const VITALIK = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+const MrO = "0x5FDF0f97954cc22d23268D930e69DC7F53018261"
+const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+const UNI = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984"
+
+

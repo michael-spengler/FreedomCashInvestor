@@ -316,3 +316,61 @@ ERROR Sun Dec 31 2023 22:03:55 GMT+0100 (Central European Standard Time) TypeErr
     at Broker.amountOfETHInSmartContract (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/broker.ts:119:30)
     at Broker.logFundamentals (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/broker.ts:198:92)
     at MoniqueBaumann.playRound (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/monique-baumann.ts:95:27)
+WARNING Mon Jan 01 2024 01:04:14 GMT+0100 (Central European Standard Time) investmentBudget: 1009491140790000000 price: 435413369042177 amountOutMinimum: 227370143038511548 delta: 2
+ERROR Mon Jan 01 2024 01:04:18 GMT+0100 (Central European Standard Time) could not coalesce error (error={ "code": -32603, "data": { "data": "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000013546f6f206c6974746c6520726563656976656400000000000000000000000000", "message": "Error: VM Exception while processing transaction: reverted with reason string 'Too little received'", "txHash": "0x2755519d7fb00a61464222ce1dd1a37f074082d45158cfce5f23d6d020136455" }, "message": "Error: VM Exception while processing transaction: reverted with reason string 'Too little received'" }, payload={ "id": 71, "jsonrpc": "2.0", "method": "eth_sendTransaction", "params": [ { "data": "0xb951433b000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb480000000000000000000000000000000000000000000000000000000000000bb800000000000000000000000000000000000000000000000000000000000003e7", "from": "0xeae3082b6e217be59e47e7c822b3c8ee39345d3c", "gas": "0xf3e58", "to": "0x10a220b8e5b1d33ae54432084acc8049c7d19b7f" } ] }, code=UNKNOWN_ERROR, version=6.9.1)
+ERROR Mon Jan 01 2024 01:05:08 GMT+0100 (Central European Standard Time) TypeError: Cannot mix BigInt and other types, use explicit conversions
+    at MoniqueBaumann.execute (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/monique-baumann.ts:185:37)
+    at Object.runMicrotasks (ext:core/01_core.js:820:30)
+    at processTicksAndRejections (ext:deno_node/_next_tick.ts:53:10)
+    at runNextTicks (ext:deno_node/_next_tick.ts:71:3)
+    at eventLoopTick (ext:core/01_core.js:188:21)
+    at async MoniqueBaumann.playRound (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/monique-baumann.ts:104:17)
+    at async MoniqueBaumann.play (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/monique-baumann.ts:85:17)
+    at async file:///home/master/Desktop/deno-modules/freedom_cash_investor/usage-example-actions-random.ts:22:1
+ERROR Mon Jan 01 2024 01:05:35 GMT+0100 (Central European Standard Time) TypeError: unsupported addressable value (argument="target", value=null, code=INVALID_ARGUMENT, version=6.9.1)
+    at makeError (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/utils/errors.js:117:21)
+    at assert (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/utils/errors.js:143:15)
+    at assertArgument (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/utils/errors.js:154:5)
+    at resolveAddress (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/address/checks.js:112:5)
+    at file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/contract/contract.js:118:24
+    at ParamType.#walkAsync (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/abi/fragments.js:578:24)
+    at ParamType.walkAsync (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/abi/fragments.js:596:24)
+    at file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/contract/contract.js:115:22
+    at Array.map (<anonymous>)
+    at resolveArgs (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/contract/contract.js:114:37)
+WARNING Mon Jan 01 2024 01:06:58 GMT+0100 (Central European Standard Time) investmentBudget: 1009491140790000000 price: 435413369042177 amountOutMinimum: 227370143038511548 delta: 2
+ERROR Mon Jan 01 2024 01:07:01 GMT+0100 (Central European Standard Time) could not coalesce error (error={ "code": -32603, "data": { "data": "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000013546f6f206c6974746c6520726563656976656400000000000000000000000000", "message": "Error: VM Exception while processing transaction: reverted with reason string 'Too little received'", "txHash": "0x3955e43db8f171471c0ad068e83f38d3d89b7e0a399cba55dcbd876322fab0b7" }, "message": "Error: VM Exception while processing transaction: reverted with reason string 'Too little received'" }, payload={ "id": 191, "jsonrpc": "2.0", "method": "eth_sendTransaction", "params": [ { "data": "0xb951433b000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb480000000000000000000000000000000000000000000000000000000000000bb800000000000000000000000000000000000000000000000000000000000003e7", "from": "0xeae3082b6e217be59e47e7c822b3c8ee39345d3c", "gas": "0xf3e58", "to": "0x10a220b8e5b1d33ae54432084acc8049c7d19b7f" } ] }, code=UNKNOWN_ERROR, version=6.9.1)
+WARNING Mon Jan 01 2024 01:09:33 GMT+0100 (Central European Standard Time) investmentBudget: 1009491140790000000 price: 435413369042177 amountOutMinimum: 227370143038511548 delta: 2
+ERROR Mon Jan 01 2024 01:09:37 GMT+0100 (Central European Standard Time) could not coalesce error (error={ "code": -32603, "data": { "data": "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000013546f6f206c6974746c6520726563656976656400000000000000000000000000", "message": "Error: VM Exception while processing transaction: reverted with reason string 'Too little received'", "txHash": "0x098454e45fae6f04bbb1b9c793f8292d2b1a19026464b53d0476996cf4cb60e5" }, "message": "Error: VM Exception while processing transaction: reverted with reason string 'Too little received'" }, payload={ "id": 354, "jsonrpc": "2.0", "method": "eth_sendTransaction", "params": [ { "data": "0xb951433b000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb480000000000000000000000000000000000000000000000000000000000000bb800000000000000000000000000000000000000000000000000000000000003e7", "from": "0xeae3082b6e217be59e47e7c822b3c8ee39345d3c", "gas": "0xf3e58", "to": "0x10a220b8e5b1d33ae54432084acc8049c7d19b7f" } ] }, code=UNKNOWN_ERROR, version=6.9.1)
+ERROR Mon Jan 01 2024 01:11:13 GMT+0100 (Central European Standard Time) TypeError: unsupported addressable value (argument="target", value=null, code=INVALID_ARGUMENT, version=6.9.1)
+    at makeError (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/utils/errors.js:117:21)
+    at assert (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/utils/errors.js:143:15)
+    at assertArgument (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/utils/errors.js:154:5)
+    at resolveAddress (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/address/checks.js:112:5)
+    at file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/contract/contract.js:118:24
+    at ParamType.#walkAsync (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/abi/fragments.js:578:24)
+    at ParamType.walkAsync (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/abi/fragments.js:596:24)
+    at file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/contract/contract.js:115:22
+    at Array.map (<anonymous>)
+    at resolveArgs (file:///home/master/.cache/deno/npm/registry.npmjs.org/ethers/6.9.1/lib.esm/contract/contract.js:114:37)
+WARNING Mon Jan 01 2024 01:11:45 GMT+0100 (Central European Standard Time) investmentBudget: 1009491140790000000 price: 435413369042177 amountOutMinimum: 227370143038511548 delta: 2
+ERROR Mon Jan 01 2024 01:11:49 GMT+0100 (Central European Standard Time) could not coalesce error (error={ "code": -32603, "data": { "data": "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000013546f6f206c6974746c6520726563656976656400000000000000000000000000", "message": "Error: VM Exception while processing transaction: reverted with reason string 'Too little received'", "txHash": "0xdc08b320b99d2de183fe97ff6d8d3a7c45682299816e6d9ff7dc226fafbf00ef" }, "message": "Error: VM Exception while processing transaction: reverted with reason string 'Too little received'" }, payload={ "id": 465, "jsonrpc": "2.0", "method": "eth_sendTransaction", "params": [ { "data": "0xb951433b000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb480000000000000000000000000000000000000000000000000000000000000bb800000000000000000000000000000000000000000000000000000000000003e7", "from": "0xeae3082b6e217be59e47e7c822b3c8ee39345d3c", "gas": "0xf3e58", "to": "0x10a220b8e5b1d33ae54432084acc8049c7d19b7f" } ] }, code=UNKNOWN_ERROR, version=6.9.1)
+ERROR Mon Jan 01 2024 01:12:39 GMT+0100 (Central European Standard Time) TypeError: Cannot mix BigInt and other types, use explicit conversions
+    at MoniqueBaumann.execute (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/monique-baumann.ts:185:37)
+    at Object.runMicrotasks (ext:core/01_core.js:820:30)
+    at processTicksAndRejections (ext:deno_node/_next_tick.ts:53:10)
+    at runNextTicks (ext:deno_node/_next_tick.ts:71:3)
+    at eventLoopTick (ext:core/01_core.js:188:21)
+    at async MoniqueBaumann.playRound (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/monique-baumann.ts:104:17)
+    at async MoniqueBaumann.play (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/monique-baumann.ts:85:17)
+    at async file:///home/master/Desktop/deno-modules/freedom_cash_investor/usage-example-actions-random.ts:22:1
+ERROR Mon Jan 01 2024 01:14:52 GMT+0100 (Central European Standard Time) TypeError: Cannot mix BigInt and other types, use explicit conversions
+    at MoniqueBaumann.execute (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/monique-baumann.ts:185:37)
+    at Object.runMicrotasks (ext:core/01_core.js:820:30)
+    at processTicksAndRejections (ext:deno_node/_next_tick.ts:53:10)
+    at runNextTicks (ext:deno_node/_next_tick.ts:71:3)
+    at eventLoopTick (ext:core/01_core.js:188:21)
+    at async MoniqueBaumann.playRound (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/monique-baumann.ts:104:17)
+    at async MoniqueBaumann.play (file:///home/master/Desktop/deno-modules/freedom_cash_investor/src/monique-baumann.ts:85:17)
+    at async file:///home/master/Desktop/deno-modules/freedom_cash_investor/usage-example-actions-random.ts:22:1
+WARNING Mon Jan 01 2024 01:15:24 GMT+0100 (Central European Standard Time) investmentBudget: 1009491140790000000 price: 435413369042177 amountOutMinimum: 227370143038511548 delta: 2
